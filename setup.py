@@ -11,14 +11,19 @@ if sys.argv[-1] == 'publish':
     sys.exit()
 
 setup(
-    name='metatabdecl',
-    version='0.2',
-    packages=['metatabdecl'],
-    package_data={'metatabdecl': ['*.csv','*.json']},
-    url='https://github.com/CivicKnowledge/metatab-declarations',
+    name='appurl',
+    version='0.0.1',
+    url='https://github.com/CivicKnowledge/appurl',
     license='MIT',
     author='Eric Busboom',
     author_email='eric@busboom.org',
     description='Url manipulation for extended application urls',
-    zip_safe=True
+    zip_safe=True,
+    entry_points = {
+        'appurl.urls' : [
+            "* = appurl.url:GeneralUrl",
+            ".zip = appurl.zip:ZipUrl",
+            "s3: = appurl.s3:S3Url"
+        ]
+    }
 )

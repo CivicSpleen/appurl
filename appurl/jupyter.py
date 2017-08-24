@@ -2,5 +2,3 @@
 # MIT, included in this distribution as LICENSE
 
 """ """
-
-from .url import Url, parse_app_url
