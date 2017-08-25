@@ -2,6 +2,9 @@
 # MIT, included in this distribution as LICENSE
 
 """ """
+from appurl.util import parse_url_to_dict, unparse_url_dict, file_ext
+from os.path import basename, join
+from appurl.url import Url
 
 class SocrataUrl(Url):
     def __init__(self, url, **kwargs):
@@ -11,9 +14,11 @@ class SocrataUrl(Url):
 
         super(SocrataUrl, self).__init__(url, **kwargs)
 
+    match_priority = 10
+
     @classmethod
     def match(cls, url, **kwargs):
-        return extract_proto(url) == 'socrata'
+        return url.proto == 'socrata'
 
     def _process_resource_url(self):
         self.resource_url = unparse_url_dict(self.parts.__dict__,

@@ -5,9 +5,27 @@
 
 from .util import reparse_url, unparse_url_dict, file_ext, parse_url_to_dict
 from os.path import basename, join, dirname
+from pkg_resources import iter_entry_points
+
+class Resolved(Exception):
+    pass
 
 def parse_app_url(u_str):
+
+    u = Url(u_str)
+
+    classes = [ep.load() for ep in iter_entry_points(group='appurl.urls') if u.match_entry_point(ep)]
+
+    for cls in sorted(classes, key=lambda cls: cls.match_priority):
+        if cls.match(u):
+            return cls(**u.dict)
+
+
+def resolve_url(url):
     pass
+
+
+
 
 class Url(object):
     """Base class for URL Managers
@@ -16,6 +34,8 @@ class Url(object):
     proto: The extension of the scheme (git+http://, etc), if there is one, otherwise the scheme.
 
     """
+
+    match_priority = 100
 
     reparse = True  # Can this URL be reparsed?
 
@@ -46,7 +66,7 @@ class Url(object):
     encoding = None
     target_segment = None
 
-    def __init__(self, url, **kwargs):
+    def __init__(self, url=None, **kwargs):
 
         assert 'is_archive' not in kwargs
 
@@ -57,8 +77,11 @@ class Url(object):
 
             for k,v in parts.items():
                 setattr(self, k, v)
+        else:
+            for k in "scheme scheme_extension netloc hostname path params query fragment username password port".split():
+                setattr(self, k,kwargs.get(k))
 
-        self._process()
+
 
         self.scheme = kwargs.get('scheme', self.scheme)
         self.proto = kwargs.get('proto', self.proto)
@@ -75,6 +98,7 @@ class Url(object):
         except AttributeError:
             pass
 
+        self._process()
 
     def _process(self):
         self._process_proto()
@@ -135,8 +159,6 @@ class Url(object):
         if not self.target_format:
             self.target_format = self.resource_format
 
-
-
     @property
     def is_archive(self):
         """Return true if this URL is for an archive. Currently only ZIP is recognized"""
@@ -175,10 +197,52 @@ class Url(object):
         return file, segment
 
 
+    def match_entry_point(self, name):
+        """Return true if this URL matches the entrypoint pattern
+
+        Entrypoint patterns:
+
+            'scheme:' Match the URL scheme
+            'proto+' Matches the protocol / scheme_extension
+            '.ext' Match the resource extension
+            '#.ext' Match the target extension
+        """
+
+        try:
+            name = name.name # Maybe it's an entrypoint entry, not the name
+        except AttributeError:
+            pass
+
+        if name == '*':
+            return True
+        elif name.endswith(":"):
+            return name[:-1] == self.scheme
+        elif name.endswith('+'):
+            return name[:-1] == self.proto
+        elif name.startswith('.'):
+            return name[1:] == self.resource_format
+        elif name.startswith('#.'):
+            return name[2:] == self.target_format
+        else:
+            return False
+
+
+
     @classmethod
     def match(cls, url, **kwargs):
         """Return True if this handler can handle the input URL"""
         raise NotImplementedError
+
+
+    def resolve(self):
+        """Convert to a more basic form.
+
+        Performs an operation, such as fetching a resource from the web, or extracting a file
+        from an archive, and return the URL for the resolved file.
+
+        """
+
+        raise NotImplementedError()
 
 
     def component_url(self, s, scheme_extension=None):
@@ -288,12 +352,20 @@ class Url(object):
 
     @property
     def dict(self):
-        from operator import itemgetter
 
-        keys = "url scheme proto resource_url resource_file resource_format target_file target_format " \
+        keys = "url scheme scheme_extension netloc hostname path params query fragment username password port " \
+               "proto resource_url resource_file resource_format target_file target_format " \
                "encoding target_segment"
 
         return dict((k, v) for k, v in self.__dict__.items() if k in keys)
+
+    def get_resource(self, downloader):
+        """Get the contents of resourceL, returning a file-like object"""
+        raise NotImplementedError()
+
+    def get_target(self, resource):
+        """Get the contents of the targetL, returning a file-like object"""
+        raise NotImplementedError()
 
     def __deepcopy__(self, o):
         d = self.__dict__.copy()
@@ -312,7 +384,7 @@ class Url(object):
 class GeneralUrl(Url):
     """Basic URL, with no special handling or protocols"""
 
-    def __init__(self, url, **kwargs):
+    def __init__(self, url=None, **kwargs):
         super(GeneralUrl, self).__init__(url, **kwargs)
 
     @classmethod
@@ -327,14 +399,13 @@ class GeneralUrl(Url):
 
         return reparse_url(self.url, path=join(dirname(self.parts.path), sp['path']), fragment=sp['fragment'])
 
-    @property
-    def auth_resource_url(self):
-        """Return An S3: version of the url, with a resource_url format that will trigger boto auth"""
 
-        # This is just assuming that the url was created as a resource from the S2Url, and
-        # has the form 'https://s3.amazonaws.com/{bucket}/{key}'
 
-        parts = parse_url_to_dict(self.resource_url)
+    def get_resource(self, cache=None):
+        pass
 
-        return 's3://{}'.format(parts['path'])
+    def get_target(self, resource):
+        pass
+
+
 

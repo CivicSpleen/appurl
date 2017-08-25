@@ -5,9 +5,7 @@ from copy import deepcopy
 from csv import DictReader, DictWriter
 import platform
 
-from appurl import Url, parse_app_url
-
-
+from appurl.url import Url, parse_app_url
 
 def data_path(v):
     from os.path import dirname, join
@@ -66,9 +64,31 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(0, errors)
 
 
-
     def test_entry_points(self):
-        
+
+        from appurl.web.s3 import S3Url
+        from appurl.web.web import WebUrl
+        from appurl.archive.zip import ZipUrl
+
+        self.assertIsInstance(parse_app_url('s3://bucket.com/foo/bar/baz.zip'), S3Url)
+        self.assertIsInstance(parse_app_url('http://bucket.com/foo/bar/baz.zip'), WebUrl)
+        self.assertIsInstance(parse_app_url('file://bucket.com/foo/bar/baz.zip'), ZipUrl)
+
+    def test_download(self):
+        from csv import DictReader
+
+        from appurl.web.download import Downloader
+        from appurl.util import get_cache
+
+        dldr = Downloader(get_cache())
+
+        with open(data_path('sources.csv')) as f:
+            for e in DictReader(f):
+                u = parse_app_url(e['url'])
+                print(type(u), u)
+                r = u.download(dldr)
+                print(r)
+
 
     def test_base_url(self):
         """Simple test of splitting and recombining"""

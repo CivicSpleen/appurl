@@ -3,26 +3,33 @@
 
 """ """
 
+from appurl.url import Url
+from os.path import basename
+from appurl.util import file_ext
+
 class S3Url(Url):
     """Convert an S3 proto url into the public access form"""
 
-    def __init__(self, url, **kwargs):
+    def __init__(self, url=None, **kwargs):
         # Save for auth_url()
         self._orig_url = url
         self._orig_kwargs = dict(kwargs.items())
 
         kwargs['proto'] = 's3'
-        super(S3Url, self).__init__(url, **kwargs)
+        super().__init__(url, **kwargs)
+
+    match_priority =  10
 
     @classmethod
     def match(cls, url, **kwargs):
-        return extract_proto(url) == 's3'
+        return url.proto == 's3';
 
     def _process_resource_url(self):
+
         url_template = 'https://s3.amazonaws.com/{bucket}/{key}'
 
-        self._bucket_name = self.parts.netloc
-        self._key = self.parts.path.strip('/')
+        self._bucket_name = self.netloc
+        self._key = '' if not self.path else self.path.strip('/')
 
         # noinspection PyUnresolvedReferences
         self.resource_url = url_template.format(bucket=self._bucket_name, key=self._key)

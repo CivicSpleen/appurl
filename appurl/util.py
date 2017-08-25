@@ -4,7 +4,8 @@
 
 """ """
 
-from os.path import splitext
+from os import makedirs
+from os.path import isdir, dirname, splitext
 
 def fs_join(*args):
     """Like os.path.join, but never returns '\' chars"""
@@ -162,3 +163,95 @@ def url_is_absolute(ref):
 
     if u.scheme in ('http', 'https'):
         return True
+
+def copy_file_or_flo(input_, output, buffer_size=64 * 1024, cb=None):
+    """ Copy a file name or file-like-object to another file name or file-like object"""
+
+    assert bool(input_)
+    assert bool(output)
+
+    input_opened = False
+    output_opened = False
+
+    try:
+        if isinstance(input_, str):
+
+            if not isdir(dirname(input_)):
+                makedirs(dirname(input_))
+
+            input_ = open(input_, 'r')
+            input_opened = True
+
+        if isinstance(output, str):
+
+            if not isdir(dirname(output)):
+                makedirs(dirname(output))
+
+            output = open(output, 'wb')
+            output_opened = True
+
+        # shutil.copyfileobj(input_,  output, buffer_size)
+
+        def copyfileobj(fsrc, fdst, length=buffer_size):
+            cumulative = 0
+            while True:
+                buf = fsrc.read(length)
+                if not buf:
+                    break
+                fdst.write(buf)
+                if cb:
+                    cumulative += len(buf)
+                    cb(len(buf), cumulative)
+
+        copyfileobj(input_, output)
+
+    finally:
+        if input_opened:
+            input_.close()
+
+        if output_opened:
+            output.close()
+
+
+DEFAULT_CACHE_NAME = 'appurl'
+
+def get_cache(cache_name=DEFAULT_CACHE_NAME, clean=False):
+    """Return the path to a file cache"""
+
+    from fs.osfs import OSFS
+    from fs.appfs import UserDataFS
+    import os
+
+    env_var = (cache_name+'_cache').upper()
+
+    cache_dir = os.getenv(env_var, None)
+
+    if cache_dir:
+        return OSFS(cache_dir)
+    else:
+        return UserDataFS(cache_name.lower())
+
+def clean_cache(cache = None, cache_name=DEFAULT_CACHE_NAME):
+    """Delete items in the cache older than 4 hours"""
+    import datetime
+
+    cache = cache if cache else get_cache(cache_name)
+
+    for step in cache.walk.info():
+        details = cache.getdetails(step[0])
+        mod = details.modified
+        now = datetime.datetime.now(tz=mod.tzinfo)
+        age = (now - mod).total_seconds()
+        if age > (60 * 60 * 4) and details.is_file:
+            cache.remove(step[0])
+
+def nuke_cache(cache = None, cache_name=DEFAULT_CACHE_NAME):
+    """Delete Everythong in the cache"""
+    from os.path import isfile
+
+    cache = cache if cache else get_cache(cache_name)
+
+    for step in cache.walk.info():
+        if not step[1].is_dir:
+            cache.remove(step[0])
+

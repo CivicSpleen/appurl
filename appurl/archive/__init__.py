@@ -3,7 +3,5 @@
 
 """ """
 
-from .url import Url, GeneralUrl
-from .file import *
 from .archive import *
-from .web import *
+from .zip import ZipUrl

@@ -1,7 +1,6 @@
 from distutils.core import setup
 
 
-
 from setuptools import setup
 import sys
 import os
@@ -22,8 +21,11 @@ setup(
     entry_points = {
         'appurl.urls' : [
             "* = appurl.url:GeneralUrl",
-            ".zip = appurl.zip:ZipUrl",
-            "s3: = appurl.s3:S3Url"
+            ".zip = appurl.archive.zip:ZipUrl",
+            "http: = appurl.web.web:WebUrl",
+            "https: = appurl.web.web:WebUrl",
+            "s3: = appurl.web.s3:S3Url"
+            "socrata+ = appurl.web.socrata:Socrata"
         ]
     }
 )

@@ -3,6 +3,7 @@
 
 """ """
 
+from appurl.url import Url
 
 class ProgramUrl(Url):
     def __init__(self, url, **kwargs):

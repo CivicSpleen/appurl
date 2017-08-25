@@ -4,20 +4,26 @@
 """ """
 
 
+from appurl.url import Url
+from appurl.util import file_ext
+
 class ZipUrl(Url):
-    def __init__(self, url, **kwargs):
+
+    match_priority = 50
+
+    def __init__(self, url=None, **kwargs):
         kwargs['resource_format'] = 'zip'
-        super(ZipUrl, self).__init__(url, **kwargs)
+        super().__init__(url, **kwargs)
 
     @classmethod
     def match(cls, url, **kwargs):
-        parts = parse_url_to_dict(url)
-        return file_ext(parts['path']) in ('zip',) or kwargs.get('force_archive')
+
+       return url.resource_format == 'zip' or kwargs.get('force_archive')
 
     def _process_fragment(self):
 
-        if self.parts.fragment:
-            self.target_file, self.target_segment = self.decompose_fragment(self.parts.fragment, self.is_archive)
+        if self.fragment:
+            self.target_file, self.target_segment = self.decompose_fragment(self.fragment, self.is_archive)
 
         else:
             self.target_file = self.target_segment = None
@@ -32,10 +38,5 @@ class ZipUrl(Url):
         if self.target_file and not self.target_format:
             self.target_format = file_ext(self.target_file)
 
-    def component_url(self, s):
 
-        if url_is_absolute(s):
-            return s
-
-        return reparse_url(self.url, fragment=s)
 
