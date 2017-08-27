@@ -55,10 +55,12 @@ a ``appurl.url.Url`` for a string. The function will select a Url class
 using two selection criteria. The first is the ``appurl.urls`` entry
 point. Here is the entrypoint configuration for the ``appurl`` package:
 
-\`\`\` entry\_points = { 'appurl.urls' : [ "\* = appurl.url:Url",
+
 
 ::
 
+      entry_points = {
+        'appurl.urls' : [ "\* = appurl.url:Url",
             #
             "http: = appurl.web.web:WebUrl",
             "https: = appurl.web.web:WebUrl",
@@ -74,7 +76,7 @@ point. Here is the entrypoint configuration for the ``appurl`` package:
         ]
     }
 
-\`\`\`
+
 
 The key of each configuration like is a string the indicate the first
 round of matching, and the value is the class to use for that matcher.
