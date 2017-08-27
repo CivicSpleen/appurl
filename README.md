@@ -2,17 +2,17 @@
 
 This library defines a structure for URLs to specify how to access file, particularly row-oriented data, that may be contained in archives or spredsheets, and may be stored on remote servers that expect particular ways of accessing files, or require credentials. The URL structure is designed to full-specify how to access data that is:
 
-    * Stored on the web: http://examples.com/file.csv
-    * Inside a zip file on the web: http://example.com/archive.zip#file.csv
-    * A worksheet in an Excel file: http://example.com/excel.xls#worksheet
-    * A worksheet in an Ecel file in a ZIP Archive: http://example.com/archive.zip#excel.xls;worksheet
-    * An API: socrata+http://chhs.data.ca.gov/api/views/tthg-z4mf
+* Stored on the web: http://examples.com/file.csv
+* Inside a zip file on the web: http://example.com/archive.zip#file.csv
+* A worksheet in an Excel file: http://example.com/excel.xls#worksheet
+* A worksheet in an Ecel file in a ZIP Archive: http://example.com/archive.zip#excel.xls;worksheet
+* An API: socrata+http://chhs.data.ca.gov/api/views/tthg-z4mf
 
 These AppUrls have these components in addition to standard URLS:
 
-    * A scheme extension, which preceedes the scheme with a '+'
-    * A target_file, the first part of the URL fragment
-    * A target_segment, the second part of a URL fragement, delineated by a ';'
+* A scheme extension, which preceedes the scheme with a '+'
+* A target_file, the first part of the URL fragment
+* A target_segment, the second part of a URL fragement, delineated by a ';'
 
 
 The ``scheme_extension`` specifies the protocol to use with a sthadard web scheme, inspired by github URLs like ``git+http://github.com/example``. The ``target_file`` is usually the file within an archive. It is interpreted as a regular expression. The ``target_segment`` may be either a name or a number, and is usually interpreted as the name or number of a worksheet in a spreadsheet file. Combining these extensions: 
