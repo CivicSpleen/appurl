@@ -4,8 +4,26 @@ import unittest
 from copy import deepcopy
 from csv import DictReader, DictWriter
 import platform
+from csv import DictReader
+from os.path import exists
 
+from appurl.util import nuke_cache
+from appurl.web.download import Downloader
+from appurl.util import get_cache
 from appurl.url import Url, parse_app_url
+from appurl.web.s3 import S3Url
+from appurl.web.web import WebUrl
+from appurl.archive.zip import ZipUrl
+from appurl.file.csv import CsvFileUrl
+
+# From https://stackoverflow.com/a/3431838
+def md5(fname):
+    import hashlib
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
 def data_path(v):
     from os.path import dirname, join
@@ -66,28 +84,86 @@ class BasicTests(unittest.TestCase):
 
     def test_entry_points(self):
 
-        from appurl.web.s3 import S3Url
-        from appurl.web.web import WebUrl
-        from appurl.archive.zip import ZipUrl
+
 
         self.assertIsInstance(parse_app_url('s3://bucket.com/foo/bar/baz.zip'), S3Url)
         self.assertIsInstance(parse_app_url('http://bucket.com/foo/bar/baz.zip'), WebUrl)
         self.assertIsInstance(parse_app_url('file://bucket.com/foo/bar/baz.zip'), ZipUrl)
 
-    def test_download(self):
-        from csv import DictReader
+    def test_entry_point_priorities(self):
+        from pkg_resources import iter_entry_points
 
-        from appurl.web.download import Downloader
-        from appurl.util import get_cache
+        for ep in iter_entry_points(group='appurl.urls'):
+            c = ep.load()
+            print(c, c.match_priority)
+
+    def test_zip_basic(self):
+
+        def callback(code, url, size):
+            if code == 'download':
+                print(code, url, size)
+
+        dldr = Downloader(get_cache(), callback=callback)
+
+        nuke_cache(get_cache())
+
+        u_s = 'http://public.source.civicknowledge.com/example.com/sources/test_data.zip#simple-example.csv'
+
+        u = parse_app_url(u_s)
+        self.assertIsInstance(u, WebUrl)
+        self.assertEqual(u_s, str(u))
+
+        r = u.get_resource(dldr)
+        self.assertIsInstance(r, ZipUrl)
+        self.assertEqual('file', r.proto)
+        self.assertTrue(exists(r.path))
+
+        t = r.get_target()
+        self.assertIsInstance(t, CsvFileUrl)
+        self.assertEqual('file', r.proto)
+        self.assertTrue(exists(r.path))
+
+        self.assertEqual('e4732aa75d0e3f712653e718851f64b8', md5(t.path))
+
+        self.assertEqual('e4732aa75d0e3f712653e718851f64b8', md5(parse_app_url(u_s).get_resource(dldr).get_target().path))
+
+        self.assertEqual('e4732aa75d0e3f712653e718851f64b8',
+                         md5(parse_app_url(u_s, dldr).get_resource().get_target().path))
+
+
+    def test_two_extensions(self):
+
+        u_s = 'http://public.source.civicknowledge.com/example.com/sources/simple-example.csv.zip'
+
+        u = parse_app_url(u_s, Downloader(get_cache()))
+        print(type(u), u, u.target_file)
+
+        r = u.get_resource()
+        self.assertEqual('simple-example.csv.zip', r.resource_file)
+        self.assertEqual('simple-example.csv', r.target_file)
+
+
+
+    def test_download(self):
+        """Test all three stages of a collection of downloadable URLS"""
 
         dldr = Downloader(get_cache())
 
         with open(data_path('sources.csv')) as f:
             for e in DictReader(f):
                 u = parse_app_url(e['url'])
-                print(type(u), u)
-                r = u.download(dldr)
-                print(r)
+
+                if not e['resource_class']:
+                    continue
+
+                self.assertEqual(e['url_class'], u.__class__.__name__)
+
+                r = u.get_resource(dldr)
+                self.assertEqual(e['resource_class'],r.__class__.__name__)
+
+                t = r.get_target()
+                self.assertEqual(e['target_class'], t.__class__.__name__)
+                self.assertTrue(exists(t.path))
 
 
     def test_base_url(self):

@@ -6,6 +6,22 @@
 from appurl.url import Url
 
 class FileUrl(Url):
-    def __init__(self, url=None, **kwargs):
-        super().__init__(url, **kwargs)
+    def __init__(self, url=None, downloader=None,**kwargs):
+        super().__init__(url, downloader=downloader, **kwargs)
+
+    match_priority = 50
+
+    def get_resource(self, downloader=None):
+        """Get the contents of resource and save it to the cache, returning a file-like object"""
+
+        return self
+
+    def get_target(self, mode=None):
+        """Get the contents of the target, and save it to the cache, returning a file-like object
+        :param downloader:
+        :param mode:
+        """
+
+        return self
+
 

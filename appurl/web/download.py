@@ -104,7 +104,7 @@ class Downloader(object):
 
             for l in locations:
                 if exists(l):
-                    parts['sys_path'] = l
+                    r.sys_path = l
                     break
             else:
                 raise DownloadError(("File resource does not exist. Found none of:"
@@ -112,6 +112,7 @@ class Downloader(object):
                                     .format('\n'.join(locations), working_dir, r.cache_path, url.path))
 
         else:
+            # Not a local file, so actually need to download it.
             try:
                 r.cache_path, r.download_time = self._download_with_lock(url.resource_url)
             except AccessError as e:
@@ -230,9 +231,9 @@ class Downloader(object):
         import requests
 
         def copy_callback(read, total):
-            # if callback:
-            #    callback('copy_file',read, total)
-            pass
+             if self.callback:
+                self.callback('copy_file',read, total)
+
 
         if self.callback:
             self.callback('download', url, 0)
@@ -308,23 +309,6 @@ class DelayedFlo(object):
             self.close_f(self.memo)
 
 
-def real_files_in_zf(zf):
-    """Return a list of internal paths of real files in a zip file, based on the 'external_attr' values"""
-    from os.path import basename
-
-    for e in zf.infolist():
-
-        if basename(e.filename).startswith('__') or basename(e.filename).startswith('.'):
-            continue
-
-        # I really don't understand external_attr, but no one else seems to either,
-        # so we're just hacking here.
-        # e.external_attr>>31&1 works when the archive has external attrs set, and a dir heirarchy
-        # e.external_attr==0 works in cases where there are no external attrs set
-        # e.external_attr==32 is true for some single-file archives.
-        if bool(e.external_attr >> 31 & 1 or e.external_attr == 0 or e.external_attr == 32):
-            yield e.filename
-
 
 def get_dflo(url, syspath):
     """Return a Delayed FLO """
@@ -389,30 +373,3 @@ def get_dflo(url, syspath):
 
     return df
 
-
-def get_file_from_zip(d, spec):
-    """Given a file name that may be a regular expression, return the full name for the file
-    from a zip archive"""
-
-    from zipfile import ZipFile
-    import re
-
-    zf = ZipFile(d['sys_path'])
-
-    nl = list(zf.namelist())
-
-    if spec.target_file:
-        names = list([e for e in nl if re.search(spec.target_file, e)
-                      and not (e.startswith('__') or e.startswith('.'))
-                      ])
-        if len(names) > 0:
-            return names[0]
-
-    if spec.target_segment:
-        try:
-            return nl[int(spec.target_segment)]
-
-        except (IndexError, ValueError):
-            pass
-
-    return nl[0]

@@ -8,10 +8,12 @@ from appurl.util import parse_url_to_dict
 
 class WebUrl(Url):
 
-    match_priority = 10
+    match_priority = 20
 
-    def __init__(self, url=None, **kwargs):
-        super().__init__(url, **kwargs)
+    def __init__(self, url=None, downloader=None, **kwargs):
+        super().__init__(url,downloader=downloader, **kwargs)
+
+        self._resource = None # return value from the downloader
 
     @classmethod
     def match(cls, url, **kwargs):
@@ -29,9 +31,20 @@ class WebUrl(Url):
 
         return 's3://{}'.format(parts['path'])
 
+    def get_resource(self, downloader=None):
+        """Get the contents of resource and save it to the cache, returning a file-like object"""
 
-    def download(self, downloader):
+        dldr = downloader or self._downloader
 
-        return downloader.download(Url(self.resource_url))
+        from appurl import parse_app_url
+
+        self._resource = dldr.download(Url(self.resource_url))
+
+        ru = parse_app_url(self._resource.sys_path)
+        ru.target_file = ru.target_file or self.target_file
+        ru.target_segment = ru.target_segment or self.target_segment
+        return ru
+
+
 
 

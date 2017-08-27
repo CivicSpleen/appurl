@@ -7,24 +7,24 @@ from .util import reparse_url, unparse_url_dict, file_ext, parse_url_to_dict
 from os.path import basename, join, dirname
 from pkg_resources import iter_entry_points
 
+
 class Resolved(Exception):
     pass
 
-def parse_app_url(u_str):
 
-    u = Url(u_str)
+def parse_app_url(u_str, downloader = None):
+    u = Url(u_str, downloader = downloader)
 
-    classes = [ep.load() for ep in iter_entry_points(group='appurl.urls') if u.match_entry_point(ep)]
+    classes = sorted([ep.load() for ep in iter_entry_points(group='appurl.urls') if u.match_entry_point(ep)],
+                      key = lambda cls: cls.match_priority)
 
-    for cls in sorted(classes, key=lambda cls: cls.match_priority):
+    for cls in classes:
         if cls.match(u):
-            return cls(**u.dict)
+            return cls(downloader=downloader, **u.dict)
 
 
 def resolve_url(url):
     pass
-
-
 
 
 class Url(object):
@@ -37,7 +37,7 @@ class Url(object):
 
     match_priority = 100
 
-    reparse = True  # Can this URL be reparsed?
+    downloader = None
 
     archive_formats = ['zip']
 
@@ -66,7 +66,7 @@ class Url(object):
     encoding = None
     target_segment = None
 
-    def __init__(self, url=None, **kwargs):
+    def __init__(self, url=None, downloader = None, **kwargs):
 
         assert 'is_archive' not in kwargs
 
@@ -75,13 +75,11 @@ class Url(object):
             parts = parse_url_to_dict(url)
             parts['resource_format'] = file_ext(parts['path'])
 
-            for k,v in parts.items():
+            for k, v in parts.items():
                 setattr(self, k, v)
         else:
             for k in "scheme scheme_extension netloc hostname path params query fragment username password port".split():
-                setattr(self, k,kwargs.get(k))
-
-
+                setattr(self, k, kwargs.get(k))
 
         self.scheme = kwargs.get('scheme', self.scheme)
         self.proto = kwargs.get('proto', self.proto)
@@ -97,6 +95,8 @@ class Url(object):
             self.target_format = self.target_file.lower()
         except AttributeError:
             pass
+
+        self._downloader = downloader
 
         self._process()
 
@@ -121,7 +121,6 @@ class Url(object):
                      self.scheme_extension or \
                      {'https': 'http', '': 'file'}.get(self.scheme) or \
                      self.scheme
-
 
     def _process_fragment(self):
         """Reassign the fragment values to one or both of the target_file and target_segment"""
@@ -196,7 +195,6 @@ class Url(object):
 
         return file, segment
 
-
     def match_entry_point(self, name):
         """Return true if this URL matches the entrypoint pattern
 
@@ -209,7 +207,7 @@ class Url(object):
         """
 
         try:
-            name = name.name # Maybe it's an entrypoint entry, not the name
+            name = name.name  # Maybe it's an entrypoint entry, not the name
         except AttributeError:
             pass
 
@@ -226,23 +224,10 @@ class Url(object):
         else:
             return False
 
-
-
     @classmethod
     def match(cls, url, **kwargs):
         """Return True if this handler can handle the input URL"""
-        raise NotImplementedError
-
-
-    def resolve(self):
-        """Convert to a more basic form.
-
-        Performs an operation, such as fetching a resource from the web, or extracting a file
-        from an archive, and return the URL for the resolved file.
-
-        """
-
-        raise NotImplementedError()
+        return True; # raise NotImplementedError("Match is not implemented for class '{}' ".format(str(cls)))
 
 
     def component_url(self, s, scheme_extension=None):
@@ -288,11 +273,9 @@ class Url(object):
         assert url
         return url
 
-
     def dirname(self):
         """Return the dirname of the path"""
         return dirname(self.path)
-
 
     def update(self, **kwargs):
         """Returns a new Url object, possibly with some of the properties replaced"""
@@ -334,14 +317,13 @@ class Url(object):
         elif target_segment or target_segment == 0:
             self.target_segment = target_segment
 
-
     def rebuild_fragment(self):
 
         second_sep = ''
         frag = ''
 
         if self.target_file:
-            frag= self.target_file
+            frag = self.target_file
             second_sep = ';'
 
         if self.target_segment or self.target_segment == 0:
@@ -359,13 +341,16 @@ class Url(object):
 
         return dict((k, v) for k, v in self.__dict__.items() if k in keys)
 
-    def get_resource(self, downloader):
-        """Get the contents of resourceL, returning a file-like object"""
-        raise NotImplementedError()
+    def get_resource(self, downloader=None):
+        """Get the contents of resource and save it to the cache, returning a file-like object"""
+        raise NotImplementedError("get_resource not implemented in "+self.__class__.__name__)
 
-    def get_target(self, resource):
-        """Get the contents of the targetL, returning a file-like object"""
-        raise NotImplementedError()
+    def get_target(self, mode=None, downloader=None):
+        """Get the contents of the target, and save it to the cache, returning a file-like object
+        :param downloader:
+        :param mode:
+        """
+        raise NotImplementedError("get_target not implemented in "+self.__class__.__name__)
 
     def __deepcopy__(self, o):
         d = self.__dict__.copy()
@@ -379,33 +364,4 @@ class Url(object):
 
     def __str__(self):
         return unparse_url_dict(self.__dict__)
-
-
-class GeneralUrl(Url):
-    """Basic URL, with no special handling or protocols"""
-
-    def __init__(self, url=None, **kwargs):
-        super(GeneralUrl, self).__init__(url, **kwargs)
-
-    @classmethod
-    def match(cls, url, **kwargs):
-        return True
-
-    def component_url(self, s):
-        sp = parse_url_to_dict(s)
-
-        if sp['netloc']:
-            return s
-
-        return reparse_url(self.url, path=join(dirname(self.parts.path), sp['path']), fragment=sp['fragment'])
-
-
-
-    def get_resource(self, cache=None):
-        pass
-
-    def get_target(self, resource):
-        pass
-
-
 

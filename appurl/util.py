@@ -5,7 +5,8 @@
 """ """
 
 from os import makedirs
-from os.path import isdir, dirname, splitext
+from os.path import isdir, dirname, splitext, exists
+
 
 def fs_join(*args):
     """Like os.path.join, but never returns '\' chars"""
@@ -254,4 +255,9 @@ def nuke_cache(cache = None, cache_name=DEFAULT_CACHE_NAME):
     for step in cache.walk.info():
         if not step[1].is_dir:
             cache.remove(step[0])
+
+def ensure_dir(path):
+
+    if path and not exists(path):
+            makedirs(path)
 

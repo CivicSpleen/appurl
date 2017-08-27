@@ -3,22 +3,21 @@
 
 """ """
 
-from appurl.url import Url
+from appurl.web import WebUrl
 from os.path import basename
 from appurl.util import file_ext
 
-class S3Url(Url):
+class S3Url(WebUrl):
     """Convert an S3 proto url into the public access form"""
 
-    def __init__(self, url=None, **kwargs):
+    def __init__(self, url=None, downloader=None, **kwargs):
         # Save for auth_url()
         self._orig_url = url
         self._orig_kwargs = dict(kwargs.items())
 
         kwargs['proto'] = 's3'
-        super().__init__(url, **kwargs)
+        super().__init__(url,downloader=downloader, **kwargs)
 
-    match_priority =  10
 
     @classmethod
     def match(cls, url, **kwargs):

@@ -20,12 +20,20 @@ setup(
     zip_safe=True,
     entry_points = {
         'appurl.urls' : [
-            "* = appurl.url:GeneralUrl",
-            ".zip = appurl.archive.zip:ZipUrl",
+            "* = appurl.url:Url",
+
+            #
             "http: = appurl.web.web:WebUrl",
             "https: = appurl.web.web:WebUrl",
-            "s3: = appurl.web.s3:S3Url"
-            "socrata+ = appurl.web.socrata:Socrata"
+            "s3: = appurl.web.s3:S3Url",
+            "socrata+ = appurl.web.socrata:SocrataUrl",
+            #
+            # Archive Urls
+            ".zip = appurl.archive.zip:ZipUrl",
+            #
+            # File Urls
+            ".csv = appurl.file.csv:CsvFileUrl",
+            "file: = appurl.file.file:FileUrl",
         ]
     }
 )

@@ -6,10 +6,10 @@
 from appurl.url import Url
 
 class ProgramUrl(Url):
-    def __init__(self, url, **kwargs):
+    def __init__(self, url, downloader=None, **kwargs):
         kwargs['proto'] = 'program'
 
-        super(ProgramUrl, self).__init__(url, **kwargs)
+        super(ProgramUrl, self).__init__(url, downloader=downloader,**kwargs)
 
     @classmethod
     def match(cls, url, **kwargs):
