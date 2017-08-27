@@ -47,8 +47,8 @@ The URLs define a few important concepts:
 -  target\_file: The name of the target\_file: 'excel.xlsx'
 -  target\_format: The extension of the target\_file: 'xlsx'
 
-Using AppUrls
-=============
+AppUrl Resolution
+=================
 
 The primary interface is ``appurls.parse_url``, which will and construct
 a ``appurl.url.Url`` for a string. The function will select a Url class
@@ -57,7 +57,7 @@ point. Here is the entrypoint configuration for the ``appurl`` package:
 
 
 
-::
+.. code-block:: python
 
       entry_points = {
         'appurl.urls' : [ "\* = appurl.url:Url",
@@ -96,3 +96,28 @@ initial matchers and sorts them by the ``Url.match_priority`` class
 property. Then, it iterates through the matched classes in priority
 order, calling the ``Url.match`` method. The function contructs and
 returns the first match.
+
+Using AppUrls
+=============
+
+Typical use is:
+
+.. code-block:: python
+
+    from appurl import get_cache, Downloader, parse_app_url
+    from os.path import exists
+
+    downloader = Downloader(get_cache())
+
+    url_str = "http://example.com/archive.zip#file.csv"
+
+    url = parse_app_url(url_str, downloader = downloader)
+
+    resource_url = url.get_resource()
+
+    target_path = resource_url.get_target()
+
+    assert exists(target_path.path)
+
+
+The call to ``url.get_resource()`` will download the resoruce file and store it in the cache ,returning a ``File:`` url pointing to the downloaded file. If the file is an archive, the call to ``resource.get_target()`` will extract the target file from the archive. If it is not an archive, it just returns the resource url. The final result is that ``target_path`` is a Url pointing to a file in the filesystem.
