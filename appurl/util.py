@@ -4,8 +4,12 @@
 
 """ """
 
+import re
 from os import makedirs
 from os.path import isdir, dirname, splitext, exists
+from urllib.parse import unquote_plus, ParseResult, urlparse, quote_plus, parse_qs, urlencode, unquote
+
+from six import text_type
 
 
 def fs_join(*args):
@@ -34,9 +38,7 @@ def parse_url_to_dict(url, assume_localhost=False):
     with properties.
 
     """
-    from urllib.parse import urlparse, urlsplit, urlunsplit, unquote_plus, ParseResult
-    from six import text_type
-    import re
+
     assert url is not None
 
     url = text_type(url)
@@ -62,6 +64,21 @@ def parse_url_to_dict(url, assume_localhost=False):
     if scheme is '':
         scheme = 'file'
 
+    frag_whole = unquote_plus(p.fragment) if p.fragment else ''
+
+    frag_parts = frag_whole.split('&', 1)
+
+    if frag_parts and '=' not in frag_parts[0]:
+        frag = frag_parts.pop(0)
+    else:
+        frag = None
+
+    frag_rem = frag_parts.pop(0) if frag_parts else None
+
+    # parse_qs returns lists for values, since queries can have multiple keys with different values,
+    # but we expect unique values
+    frag_query = { k:v[0] for k, v in  (parse_qs(frag_rem) if p.fragment else {}).items()  }
+
 
     return {
         'scheme': scheme,
@@ -71,15 +88,14 @@ def parse_url_to_dict(url, assume_localhost=False):
         'path': p.path,
         'params': p.params,
         'query': p.query,
-        'fragment': unquote_plus(p.fragment) if p.fragment else None,
+        'fragment': frag if frag else None,
+        'fragment_query': frag_query,
         'username': p.username,
         'password': p.password,
         'port': p.port
     }
 
 def unparse_url_dict(d, **kwargs):
-
-    from six.moves.urllib.parse import urlparse, urlsplit, urlunsplit, quote_plus
 
     d = dict(d.items())
 
@@ -92,7 +108,7 @@ def unparse_url_dict(d, **kwargs):
         host_port = ''
 
     if 'port' in d and d['port']:
-        host_port += ':' + text_type(d['port'])
+        host_port += ':' + str(d['port'])
 
     user_pass = ''
     if 'username' in d and d['username']:
@@ -124,8 +140,10 @@ def unparse_url_dict(d, **kwargs):
     if 'query' in d and d['query']:
         url += '?' + d['query']
 
-    if d.get('fragment'):
-        url += '#' + ';'.join(quote_plus(e) for e in d['fragment'].split(';'))
+    if d.get('fragment') or d.get('fragment_query'):
+        seg = (';'.join(quote_plus(e) for e in d['fragment'].split(';'))) if d.get('fragment') else ''
+        query = '&'+urlencode(d.get('fragment_query'),doseq=True) if d.get('fragment_query') else ''
+        url += "#"+seg+unquote(query)
 
     return url
 
@@ -158,12 +176,6 @@ def file_ext(v):
         return None
 
 
-
-def url_is_absolute(ref):
-    u = Url(ref)
-
-    if u.scheme in ('http', 'https'):
-        return True
 
 def copy_file_or_flo(input_, output, buffer_size=64 * 1024, cb=None):
     """ Copy a file name or file-like-object to another file name or file-like object"""
@@ -248,7 +260,6 @@ def clean_cache(cache = None, cache_name=DEFAULT_CACHE_NAME):
 
 def nuke_cache(cache = None, cache_name=DEFAULT_CACHE_NAME):
     """Delete Everythong in the cache"""
-    from os.path import isfile
 
     cache = cache if cache else get_cache(cache_name)
 
@@ -260,4 +271,5 @@ def ensure_dir(path):
 
     if path and not exists(path):
             makedirs(path)
+
 

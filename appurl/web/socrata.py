@@ -36,7 +36,7 @@ class SocrataUrl(WebUrl):
 
         self.target_file = self.resource_file  # _process_target() file will use this self.target_file
 
-    def get_resource(self, downloader=None):
+    def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
         raise NotImplementedError()
 

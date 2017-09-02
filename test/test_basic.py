@@ -9,7 +9,7 @@ from os.path import exists
 
 from appurl.util import nuke_cache
 from appurl.web.download import Downloader
-from appurl.util import get_cache
+from appurl.util import get_cache, parse_url_to_dict
 from appurl.url import Url, parse_app_url
 from appurl.web.s3 import S3Url
 from appurl.web.web import WebUrl
@@ -38,7 +38,6 @@ def script_path(v=None):
         return join(d, 'scripts', v)
     else:
         return join(d, 'scripts')
-
 
 def sources():
     import csv
@@ -84,8 +83,6 @@ class BasicTests(unittest.TestCase):
 
     def test_entry_points(self):
 
-
-
         self.assertIsInstance(parse_app_url('s3://bucket.com/foo/bar/baz.zip'), S3Url)
         self.assertIsInstance(parse_app_url('http://bucket.com/foo/bar/baz.zip'), WebUrl)
         self.assertIsInstance(parse_app_url('file://bucket.com/foo/bar/baz.zip'), ZipUrl)
@@ -95,53 +92,7 @@ class BasicTests(unittest.TestCase):
 
         for ep in iter_entry_points(group='appurl.urls'):
             c = ep.load()
-            print(c, c.match_priority)
-
-    def test_zip_basic(self):
-
-        def callback(code, url, size):
-            if code == 'download':
-                print(code, url, size)
-
-        dldr = Downloader(get_cache(), callback=callback)
-
-        nuke_cache(get_cache())
-
-        u_s = 'http://public.source.civicknowledge.com/example.com/sources/test_data.zip#simple-example.csv'
-
-        u = parse_app_url(u_s)
-        self.assertIsInstance(u, WebUrl)
-        self.assertEqual(u_s, str(u))
-
-        r = u.get_resource(dldr)
-        self.assertIsInstance(r, ZipUrl)
-        self.assertEqual('file', r.proto)
-        self.assertTrue(exists(r.path))
-
-        t = r.get_target()
-        self.assertIsInstance(t, CsvFileUrl)
-        self.assertEqual('file', r.proto)
-        self.assertTrue(exists(r.path))
-
-        self.assertEqual('e4732aa75d0e3f712653e718851f64b8', md5(t.path))
-
-        self.assertEqual('e4732aa75d0e3f712653e718851f64b8', md5(parse_app_url(u_s).get_resource(dldr).get_target().path))
-
-        self.assertEqual('e4732aa75d0e3f712653e718851f64b8',
-                         md5(parse_app_url(u_s, dldr).get_resource().get_target().path))
-
-
-    def test_two_extensions(self):
-
-        u_s = 'http://public.source.civicknowledge.com/example.com/sources/simple-example.csv.zip'
-
-        u = parse_app_url(u_s, Downloader(get_cache()))
-        print(type(u), u, u.target_file)
-
-        r = u.get_resource()
-        self.assertEqual('simple-example.csv.zip', r.resource_file)
-        self.assertEqual('simple-example.csv', r.target_file)
-
+            print(ep.name, c, c.match_priority)
 
 
     def test_download(self):
@@ -151,19 +102,50 @@ class BasicTests(unittest.TestCase):
 
         with open(data_path('sources.csv')) as f:
             for e in DictReader(f):
-                u = parse_app_url(e['url'])
+                u = parse_app_url(e['url'], downloader=dldr)
 
                 if not e['resource_class']:
                     continue
 
-                self.assertEqual(e['url_class'], u.__class__.__name__)
+                self.assertEqual(e['url_class'], u.__class__.__name__, e['name'])
+                self.assertEqual(e['resource_format'], u.resource_format, e['name'])
 
-                r = u.get_resource(dldr)
-                self.assertEqual(e['resource_class'],r.__class__.__name__)
+                r = u.get_resource()
+                self.assertEqual(e['resource_class'],r.__class__.__name__, e['name'])
+                self.assertEqual(e['resource_format'], r.resource_format, e['name'])
 
                 t = r.get_target()
-                self.assertEqual(e['target_class'], t.__class__.__name__)
+                self.assertEqual(e['target_class'], t.__class__.__name__, e['name'])
+                self.assertEqual(e['target_format'], t.target_format, e['name'])
                 self.assertTrue(exists(t.path))
+
+    def test_url_classes(self):
+
+        with open(data_path('url_classes.csv')) as f:
+            for e in DictReader(f):
+
+                if not e['class']:
+                    continue
+
+                print(e['in_url'])
+                u = parse_app_url(e['in_url'])
+
+                self.assertEquals(e['url'], str(u))
+                self.assertEqual(e['resource_url'], str(u.resource_url))
+                self.assertEqual(e['resource_file'], u.resource_file)
+                self.assertEqual(e['target_file'], u.target_file or '')
+
+
+    def test_component(self):
+
+        with open(data_path('components.csv')) as f:
+            for e in DictReader(f):
+
+                b = parse_app_url(e['base_url'])
+                c = parse_app_url(e['component_url'])
+
+                self.assertEquals(str(b.component_url(c)), e['final_url'])
+
 
 
     def test_base_url(self):
@@ -180,110 +162,23 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('file.csv', Url('http://server.com/a/b/c/resource.zip#file.csv').target_file)
         self.assertEqual('resource.zip', Url('http://server.com/a/b/c/resource.zip#file.csv').resource_file)
 
-    def test_urls(self):
+    def test_file_url(self):
 
-        headers = "in_url class url resource_url resource_file target_file scheme proto resource_format target_format " \
-                  "is_archive encoding target_segment".split()
+        u = parse_app_url('/foo/bar/file.csv')
+        print(u.target_format)
 
-        import tempfile
-        tf = tempfile.NamedTemporaryFile(prefix="rowgen", delete=False)
-        temp_name = tf.name
-        tf.close()
+    def test_component_url(self):
 
-        # S3 URLS have these fields which need to be removed before writing to CSV files.
-        def clean(do):
+        with open(data_path('components.csv')) as f:
+            for l in DictReader(f):
+                base_url = parse_app_url(l['base_url'])
 
-            for f in ['_orig_url', '_key', '_orig_kwargs', '_bucket_name']:
-                try:
-                    del do[f]
-                except KeyError:
-                    pass
+                #component_url = l['component_url']
+                #curl = base_url.component_url(component_url)
+                #self.assertEquals(l['final_url'], curl)
 
-        with open(data_path('url_classes.csv')) as f, open(temp_name, 'w') as f_out:
-            w = None
-            r = DictReader(f)
-            errors = 0
-            for i, d in enumerate(r):
+                print(base_url)
 
-                url = d['in_url']
-
-                o = Url(url)
-
-                do = dict(o.__dict__.items())
-
-                if w is None:
-                    w = DictWriter(f_out, fieldnames=headers)
-                    w.writeheader()
-                do['in_url'] = url
-                do['is_archive'] = o.is_archive
-                do['class'] = o.__class__.__name__
-                clean(do)
-                w.writerow(dict( (k,v) for k,v in do.items() if k in headers) )
-
-                d = {k: v if v else None for k, v in d.items()}
-                do = {k: str(v) if v else None for k, v in do.items()}  # str() turns True into 'True'
-
-                # a is the gague data from url_classes.csv
-                # b is the test object.
-
-                try:  # A, B
-                    self.compare_dict(url, d, do)
-                except AssertionError as e:
-                    errors += 1
-                    print(e)
-                    # raise
-
-            self.assertEqual(0, errors)
-
-        with open(data_path('url_classes.csv')) as f:
-
-            r = DictReader(f)
-            for i, d in enumerate(r):
-                u1 = Url(d['in_url'])
-
-        with open(data_path('url_classes.csv')) as f:
-
-            r = DictReader(f)
-            for i, d in enumerate(r):
-                u1 = Url(d['in_url'])
-                d1 = u1.__dict__.copy()
-                d2 = deepcopy(u1).__dict__.copy()
-
-                # The parts will be different Bunch objects
-                clean(d1)
-                clean(d2)
-                del d1['parts']
-                del d2['parts']
-
-                self.assertEqual(d1, d2)
-
-                self.assertEqual(d1, u1.dict)
-
-        for us in ("http://example.com/foo.zip", "http://example.com/foo.zip#a;b"):
-            u = Url(us, encoding='utf-8')
-            u2 = u.update(target_file='bingo.xls', target_segment='1')
-
-            self.assertEqual('utf-8', u2.dict['encoding'])
-            self.assertEqual('bingo.xls', u2.dict['target_file'])
-            self.assertEqual('1', u2.dict['target_segment'])
-
-    def test_url_update(self):
-
-        u1 = Url('http://example.com/foo.zip')
-
-        self.assertEqual('http://example.com/foo.zip#bar.xls', u1.rebuild_url(target_file='bar.xls'))
-        self.assertEqual('http://example.com/foo.zip#0', u1.rebuild_url(target_segment=0))
-        self.assertEqual('http://example.com/foo.zip#bar.xls%3B0',
-                         u1.rebuild_url(target_file='bar.xls', target_segment=0))
-
-        u2 = u1.update(target_file='bar.xls')
-
-        self.assertEqual('bar.xls', u2.target_file)
-        self.assertEqual('xls', u2.target_format)
-
-        self.assertEqual('http://example.com/foo.zip', u1.rebuild_url(False, False))
-
-        self.assertEqual('file:metatadata.csv', Url('file:metatadata.csv').rebuild_url())
 
     def test_parse_file_urls(self):
         from rowgenerators.util import parse_url_to_dict, unparse_url_dict, reparse_url
@@ -295,22 +190,9 @@ class BasicTests(unittest.TestCase):
         ]
 
         for i, o, u in urls:
-            p = parse_url_to_dict(i)
-            self.assertEqual(o, p['path'])
-            self.assertEqual(u, unparse_url_dict(p))
-            # self.assertEqual(o, parse_url_to_dict(u)['path'])
-
-        return
-
-        print(reparse_url("metatab+http://library.metatab.org/cdph.ca.gov-county_crosswalk-ca-2#county_crosswalk",
-                          scheme_extension=False, fragment=False))
-
-        d = {'netloc': 'library.metatab.org', 'params': '', 'path': '/cdph.ca.gov-county_crosswalk-ca-2',
-             'password': None, 'query': '', 'hostname': 'library.metatab.org', 'fragment': 'county_crosswalk',
-             'resource_format': 'gov-county_crosswalk-ca-2', 'port': None, 'scheme_extension': 'metatab',
-             'proto': 'metatab', 'username': None, 'scheme': 'http'}
-
-        print(unparse_url_dict(d, scheme_extension=False, fragment=False))
+            p = parse_app_url(i)
+            self.assertEqual(o, p.path)
+            self.assertEqual(u, str(p))
 
     def test_metatab_url(self):
 
@@ -327,7 +209,6 @@ class BasicTests(unittest.TestCase):
 
     @unittest.skipIf(platform.system() == 'Windows','ProgramSources don\'t work on Windows')
     def test_program(self):
-        from rowgenerators import parse_url_to_dict
 
         urls = (
             ('program:rowgen.py', 'rowgen.py'),
@@ -364,39 +245,15 @@ class BasicTests(unittest.TestCase):
             print(row)
 
 
-    def test_notebook(self):
-        from rowgenerators.fetch import download_and_cache
-
-        urls = (
-            'ipynb+file:foobar.ipynb',
-            'ipynb+http://example.com/foobar.ipynb',
-            'ipynb:foobar.ipynb'
-
-        )
-
-
-
-
-    def test_component_url(self):
-
-        with open(data_path('components.csv')) as f:
-            for l in DictReader(f):
-                base_url = Url(l['base_url'])
-                component_url = l['component_url']
-                curl = base_url.component_url(component_url)
-
-                self.assertEquals(l['final_url'], curl )
-
-
     def test_windows_urls(self):
 
         url = 'w:/metatab36/metatab-py/metatab/templates/metatab.csv'
 
-        print(parse_url_to_dict(url))
+        print(parse_app_url(url))
 
         url = 'N:/Desktop/metadata.csv#renter_cost'
 
-        print(parse_url_to_dict(url))
+        print(parse_app_url(url))
 
     def test_query_urls(self):
 
@@ -408,17 +265,14 @@ class BasicTests(unittest.TestCase):
         print(u.target_file, u.target_format)
 
 
-    def test_s3_url(self):
-
-        from rowgenerators.urls import S3Url
-
-        url_str = 's3://bucket/a/b/c/file.csv'
-
-        u = Url(url_str)
-
-        self.assertEquals(S3Url, type(u))
 
 
+    def test_socrata(self):
+
+        u_s = 'https://data.lacounty.gov/api/views/8rdv-6nb6/rows.csv?accessType=DOWNLOAD'
+        u = parse_app_url(u_s)
+        print(type(u))
+        print(u.resource_url)
 
 
 if __name__ == '__main__':

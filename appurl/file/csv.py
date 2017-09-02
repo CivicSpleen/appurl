@@ -1,4 +1,7 @@
+# Copyright (c) 2017 Civic Knowledge. This file is licensed under the terms of the
+# MIT, included in this distribution as LICENSE
 
+""" """
 
 from .file import FileUrl
 from os.path import basename
@@ -21,3 +24,4 @@ class CsvFileUrl(FileUrl):
 
         if not self.resource_format:
             self.resource_format = file_ext(self.resource_file)
+

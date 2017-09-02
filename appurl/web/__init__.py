@@ -4,3 +4,6 @@
 """ """
 
 from .web import WebUrl
+from .s3 import S3Url
+from .socrata import SocrataUrl
+from .download import Downloader

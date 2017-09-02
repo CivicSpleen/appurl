@@ -36,3 +36,5 @@
 "http://example.com/a/b.txt","program:bar/baz.txt","http://example.com/a/bar/baz.txt"
 "http://example.com/a/b.txt","program:/bar/baz.txt","http://example.com/bar/baz.txt"
 "s3://bucket/prefix/metadata.csv","data/foo.csv","s3://bucket/prefix/data/foo.csv"
+"proto+file:/a/b","file:bar/baz.txt","proto+file:/a/bar/baz.txt"
+"proto+file:/a/b","file:/bar/baz.txt","proto+file:/bar/baz.txt"

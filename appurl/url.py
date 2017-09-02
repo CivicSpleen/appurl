@@ -8,23 +8,52 @@ from os.path import basename, join, dirname
 from pkg_resources import iter_entry_points
 
 
-class Resolved(Exception):
-    pass
 
+def match_url_classes(u_str, **kwargs):
+    """
+    Return the classes for which the url matches an entry_point specification, sorted by priority
 
-def parse_app_url(u_str, downloader = None):
-    u = Url(u_str, downloader = downloader)
+    :param u_str: Url string
+    :param kwargs: arguments passed to Url constructor
+    :return:
+    """
 
-    classes = sorted([ep.load() for ep in iter_entry_points(group='appurl.urls') if u.match_entry_point(ep)],
-                      key = lambda cls: cls.match_priority)
+    u = Url(str(u_str), downloader=None, **kwargs)
+
+    classes = sorted([ep.load() for ep in iter_entry_points(group='appurl.urls') if u.match_entry_point(ep.name)],
+                     key=lambda cls: cls.match_priority)
+
+    return classes
+
+def parse_app_url(u_str, downloader = 'default', **kwargs):
+    """
+    Parse a URL string and return a constructed Url object, with the class based on the highest priority
+    entry point that matches the Url and which of the entry point classes pass the match() test.
+
+    :param u_str: Url string
+    :param downloader: Downloader() to use for downloading objects.
+    :param kwargs: Args passed to the Url constructor.
+    :return:
+    """
+
+    if not u_str:
+        return None
+
+    if isinstance(u_str, Url):
+        return u_str
+
+    if downloader == 'default':
+        from appurl import get_cache, Downloader
+        downloader = Downloader(get_cache())
+
+    classes = match_url_classes(u_str,**kwargs)
+
+    u = Url(str(u_str), downloader=None, **kwargs)
 
     for cls in classes:
         if cls.match(u):
-            return cls(downloader=downloader, **u.dict)
+            return cls(str(u_str) if u_str else None, downloader=downloader, **kwargs)
 
-
-def resolve_url(url):
-    pass
 
 
 class Url(object):
@@ -50,6 +79,7 @@ class Url(object):
     params = None
     query = None
     fragment = None
+    fragment_query = None
     username = None
     password = None
     port = None
@@ -62,9 +92,13 @@ class Url(object):
     resource_format = None
     target_file = None
     target_format = None
-    target_format = None
-    encoding = None
     target_segment = None
+
+    encoding = None # target encoding
+    headers = None # line number of headers
+    start = None # start line for data
+    end = None # end line for data
+
 
     def __init__(self, url=None, downloader = None, **kwargs):
 
@@ -78,27 +112,37 @@ class Url(object):
             for k, v in parts.items():
                 setattr(self, k, v)
         else:
-            for k in "scheme scheme_extension netloc hostname path params query fragment username password port".split():
+            for k in "scheme scheme_extension netloc hostname path params query fragment fragment_query username password port".split():
                 setattr(self, k, kwargs.get(k))
+
+        self.fragment_query = kwargs.get('fragment_query', self.fragment_query or {})
+        self.fragment = kwargs.get('fragment', self.fragment)
+        self.scheme_extension = kwargs.get('scheme_extension', self.scheme_extension)
 
         self.scheme = kwargs.get('scheme', self.scheme)
         self.proto = kwargs.get('proto', self.proto)
         self.resource_url = kwargs.get('resource_url', self.resource_url)
         self.resource_file = kwargs.get('resource_file', self.resource_file)
-        self.resource_format = kwargs.get('resource_format', self.resource_format)
+        self.resource_format = kwargs.get('resource_format', self.fragment_query.get('resource_format',self.resource_format))
         self.target_file = kwargs.get('target_file', self.target_file)
-        self.target_format = kwargs.get('target_format', self.target_format)
-        self.encoding = kwargs.get('encoding', self.encoding)
+        self.target_format = kwargs.get('target_format', self.fragment_query.get('target_format', self.target_format))
         self.target_segment = kwargs.get('target_segment', self.target_segment)
 
+        self.encoding = kwargs.get('encoding', self.fragment_query.get('encoding',self.encoding))
+        self.headers = kwargs.get('headers', self.fragment_query.get('headers',self.headers))
+        self.start = kwargs.get('start', self.fragment_query.get('start',self.start))
+        self.end = kwargs.get('end', self.fragment_query.get('end',self.end))
+
         try:
-            self.target_format = self.target_file.lower()
+            self.target_format = self.target_format.lower()
         except AttributeError:
             pass
 
         self._downloader = downloader
 
         self._process()
+
+
 
     def _process(self):
         self._process_proto()
@@ -122,6 +166,13 @@ class Url(object):
                      {'https': 'http', '': 'file'}.get(self.scheme) or \
                      self.scheme
 
+    def _process_fragement_query(self):
+        """Set fragment query values"""
+
+        # These are copied from the URl with setarrt in the constructor
+        pass
+
+
     def _process_fragment(self):
         """Reassign the fragment values to one or both of the target_file and target_segment"""
 
@@ -139,9 +190,10 @@ class Url(object):
         self.resource_url = unparse_url_dict(self.__dict__,
                                              scheme=self.scheme if self.scheme else 'file',
                                              scheme_extension=False,
+                                             fragment_query=False,
                                              fragment=False)
 
-        self.resource_file = basename(reparse_url(self.resource_url, query=None))
+        self.resource_file = basename(self.path)
 
         if not self.resource_format:
             self.resource_format = file_ext(self.resource_file)
@@ -150,7 +202,7 @@ class Url(object):
         """Set the target_file and target_format"""
 
         if not self.target_file:
-            self.target_file = basename(reparse_url(self.resource_url, query=None))
+            self.target_file = basename(self.path)
 
         if not self.target_format:
             self.target_format = file_ext(self.target_file)
@@ -206,6 +258,9 @@ class Url(object):
             '#.ext' Match the target extension
         """
 
+        if '&' in name:
+            return all(self.match_entry_point(n) for n in name.split('&'))
+
         try:
             name = name.name  # Maybe it's an entrypoint entry, not the name
         except AttributeError:
@@ -236,20 +291,35 @@ class Url(object):
         :param scheme_extension:
         :return:
         """
-        raise NotImplementedError()
 
-        sp = parse_url_to_dict(s)
+        from copy import copy
+
+        try:
+            path = s.path
+            netloc = s.netloc
+            u = s
+        except AttributeError:
+            u = parse_app_url(s)
+            path = u.path
+            netloc = u.netloc
 
         # If there is a netloc, it's an absolute URL
-        if sp['netloc']:
-            return s
+        if netloc:
+            return u
 
-        url = reparse_url(s, path=join(dirname(self.parts.path), sp['path']),
-                          fragment=sp['fragment'],
-                          scheme_extension=scheme_extension or sp['scheme_extension'])
+        url = copy(self)
+        url.path = join(dirname(self.path), path)
 
-        assert url
         return url
+
+    @property
+    def inner(self):
+        """Return the URL whouth the scheme extension and fragment. Re-parses the URL, so it should return
+        the correct class for the inner URL. """
+        if not self.scheme_extension:
+            return self
+
+        return parse_app_url(str(self.clone(scheme_extension=None)))
 
     def abspath(self, s):
         raise NotImplementedError()
@@ -276,6 +346,19 @@ class Url(object):
     def dirname(self):
         """Return the dirname of the path"""
         return dirname(self.path)
+
+    def clear_fragment(self):
+        """Return a copy of the URL with no fragment components"""
+
+        c =  self.clone()
+        c.fragment = None
+        c.fragment_query = {}
+        c.encoding = None
+        c.start = None
+        c.end = None
+        c.headers = None
+        return c
+
 
     def update(self, **kwargs):
         """Returns a new Url object, possibly with some of the properties replaced"""
@@ -334,34 +417,64 @@ class Url(object):
 
     @property
     def dict(self):
-
-        keys = "url scheme scheme_extension netloc hostname path params query fragment username password port " \
+        self._update_parts()
+        keys = "url scheme scheme_extension netloc hostname path params query fragment fragment_query username password port " \
                "proto resource_url resource_file resource_format target_file target_format " \
                "encoding target_segment"
 
         return dict((k, v) for k, v in self.__dict__.items() if k in keys)
 
-    def get_resource(self, downloader=None):
+    def _update_parts(self):
+        """Update the fragement_query. Set the attribute for the query value to False to delete it from
+        the fragment query"""
+
+        for k in "encoding headers start end".split():
+            if getattr(self, k):
+                self.fragment_query[k] = getattr(self, k)
+            elif getattr(self, k) == False and k in self.fragment_query:
+                del self.fragment_query[k]
+
+        #if self.fragment:
+        #    self.rebuild_fragment()
+
+
+
+    def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
         raise NotImplementedError("get_resource not implemented in "+self.__class__.__name__)
 
-    def get_target(self, mode=None, downloader=None):
+    def get_target(self, mode=None):
         """Get the contents of the target, and save it to the cache, returning a file-like object
-        :param downloader:
         :param mode:
         """
         raise NotImplementedError("get_target not implemented in "+self.__class__.__name__)
 
-    def __deepcopy__(self, o):
+    def __deepcopy__(self, memo):
         d = self.__dict__.copy()
-        return type(self)(None, **d)
+        return type(self)(None, downloader=self._downloader, **d)
 
-    def __copy__(self, o):
-        return self.__deepcopy__(o)
+    def __copy__(self):
+        d = self.__dict__.copy()
+        return type(self)(None, downloader=self._downloader, **d,)
+
+    def clone(self, **kwargs):
+        from copy import copy
+
+        d = self.__dict__.copy()
+        c = type(self)(None, downloader=self._downloader, **d)
+
+        c._update_parts()
+
+        for k, v in kwargs.items():
+            setattr(c, k, v )
+
+        return c
+
 
     def __repr__(self):
         return "<{} {}>".format(self.__class__.__name__, str(self))
 
     def __str__(self):
+        self._update_parts()
         return unparse_url_dict(self.__dict__)
 

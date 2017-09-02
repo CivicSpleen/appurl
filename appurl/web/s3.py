@@ -3,9 +3,11 @@
 
 """ """
 
-from appurl.web import WebUrl
-from os.path import basename
+from appurl import parse_app_url
 from appurl.util import file_ext
+from appurl.web import WebUrl
+from os.path import basename, join, dirname
+
 
 class S3Url(WebUrl):
     """Convert an S3 proto url into the public access form"""
@@ -44,11 +46,19 @@ class S3Url(WebUrl):
         return 's3://{bucket}/{key}'.format(bucket=self._bucket_name, key=self._key)
 
     def component_url(self, s, scheme_extension=None):
-        sp = parse_url_to_dict(s)
 
-        new_key = join(dirname(self.key), sp['path'])
+        try:
+            path = s.path
+        except AttributeError:
+            path = parse_app_url(s).path
 
-        return 's3://{bucket}/{key}'.format(bucket=self._bucket_name.strip('/'), key=new_key.lstrip('/'))
+        # If there is a netloc, it's an absolute URL
+        if s.netloc:
+            return s
+
+        new_key = join(dirname(self.key), path)
+
+        return parse_app_url('s3://{bucket}/{key}'.format(bucket=self._bucket_name.strip('/'), key=new_key.lstrip('/')))
 
     @property
     def bucket_name(self):

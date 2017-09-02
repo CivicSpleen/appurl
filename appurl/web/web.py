@@ -18,7 +18,7 @@ class WebUrl(Url):
     @classmethod
     def match(cls, url, **kwargs):
         """Return True if this handler can handle the input URL"""
-        return url.proto == 'http'
+        return url.scheme.startswith('http')
 
     @property
     def auth_resource_url(self):
@@ -31,19 +31,33 @@ class WebUrl(Url):
 
         return 's3://{}'.format(parts['path'])
 
-    def get_resource(self, downloader=None):
+    def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
 
-        dldr = downloader or self._downloader
 
         from appurl import parse_app_url
 
-        self._resource = dldr.download(Url(self.resource_url))
+        self._resource = self._downloader.download(self.inner)
 
-        ru = parse_app_url(self._resource.sys_path)
-        ru.target_file = ru.target_file or self.target_file
-        ru.target_segment = ru.target_segment or self.target_segment
+        ru = parse_app_url(self._resource.sys_path,
+                           fragment=self.fragment,
+                           fragment_query=self.fragment_query,
+                           scheme_extension=self.scheme_extension
+                           )
+
+
         return ru
+
+    def component_url(self, s, scheme_extension=None):
+
+
+        if self.resource_format in ('zip','xlsx'):
+            u = Url(s)
+            return self.clone(fragment=u.path)
+        else:
+            return super().component_url(s, scheme_extension)
+
+
 
 
 

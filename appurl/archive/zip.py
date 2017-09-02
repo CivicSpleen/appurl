@@ -6,10 +6,16 @@
 
 from appurl.url import Url, parse_app_url
 from appurl.util import file_ext
+from appurl.file import FileUrl
+from appurl.exc import AppUrlError
 from zipfile import ZipFile
 import io
 from os.path import join, dirname
 from appurl.util import copy_file_or_flo, ensure_dir
+
+class ZipUrlError(AppUrlError):
+    pass
+
 
 def real_files_in_zf(zf):
     """Return a list of internal paths of real files in a zip file, based on the 'external_attr' values"""
@@ -41,6 +47,11 @@ def get_file_from_zip(url):
 
     nl = list(real_files_in_zf(zf)) # Old way, but maybe gets links? : list(zf.namelist())
 
+    if not nl:
+        # sometimes real_files_in_zf doesn't work at all. I don't know why it does work,
+        # so I certainly don't know why it does not.
+        nl = list(zf.namelist())
+
     # the target_file may be a string, or a regular expression
     if url.target_file:
         names = list([e for e in nl if re.search(url.target_file, e)
@@ -60,10 +71,14 @@ def get_file_from_zip(url):
             pass
 
     # Just return the first file in the archive.
-    return nl[0]
+    if not url.target_file and not url.target_segment:
+        return nl[0]
+    else:
+        raise ZipUrlError("Could not find file in Zip for target='{}' nor segment='{}'".format(url.target_file, url.target_segment))
 
 
-class ZipUrl(Url):
+
+class ZipUrl(FileUrl):
 
     match_priority = 40
 
@@ -75,6 +90,9 @@ class ZipUrl(Url):
     def match(cls, url, **kwargs):
 
        return url.resource_format == 'zip' or kwargs.get('force_archive')
+
+    def _process(self):
+        super()._process()
 
     def _process_fragment(self):
 
@@ -94,14 +112,14 @@ class ZipUrl(Url):
         if self.target_file and not self.target_format:
             self.target_format = file_ext(self.target_file)
 
-    def get_resource(self, downloader=None):
+    def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
 
         return self
 
     @property
     def zip_dir(self):
-        return self.path.replace('.zip','_zip') # Hope that the '.zip is only at the end
+        return self.path+'_d'
 
     def get_target(self, mode=None):
         """Get the contents of the target, and save it to the cache, returning a file-like object
@@ -109,23 +127,29 @@ class ZipUrl(Url):
         :param mode:
         """
 
-
-        target_path = join(self.zip_dir, self.target_file)
+        assert self.zip_dir
 
         zf = ZipFile(self.path)
 
-        filename = get_file_from_zip(self)
+        self.target_file = get_file_from_zip(self)
 
-        if (mode and 'b' in mode) or (not self.encoding):
-            flo = zf.open(filename, mode.replace('b', '') if mode else 'r' )
-        else:
-            flo = io.TextIOWrapper(zf.open(filename, mode or 'r'),
-                                   encoding=self.encoding if self.encoding else 'utf8')
-
-
+        target_path = join(self.zip_dir, self.target_file)
         ensure_dir(dirname(target_path))
 
-        with io.open(target_path, 'wb') as f:
+        #if self.encoding:
+        #    pass
+        #    flo = io.TextIOWrapper(flo, encoding=self.encoding if self.encoding else 'utf8')
+
+
+        with io.open(target_path, 'wb') as f, zf.open(self.target_file) as flo:
             copy_file_or_flo(flo, f)
 
-        return parse_app_url(target_path)
+        return parse_app_url(target_path,
+                             fragment_query=self.fragment_query,
+                             fragement=self.fragment,
+                             scheme_extension=self.scheme_extension,
+                             # Clear out the resource info so we don't get a ZipUrl
+                             resource_file=False,
+                             resource_format=False,
+                             resource_url=False
+                             )

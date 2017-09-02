@@ -4,6 +4,7 @@
 """Base class for file URLs, URLs on a local file system. These are URLs that can be opened and read"""
 
 from appurl.url import Url
+from os.path import exists
 
 class FileUrl(Url):
     def __init__(self, url=None, downloader=None,**kwargs):
@@ -11,7 +12,10 @@ class FileUrl(Url):
 
     match_priority = 50
 
-    def get_resource(self, downloader=None):
+    def exists(self):
+        return exists(self.path)
+
+    def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
 
         return self
@@ -22,6 +26,10 @@ class FileUrl(Url):
         :param mode:
         """
 
-        return self
+        return self.clear_fragment()
 
 
+    def read(self, mode='rb'):
+        """Return contents of file"""
+        with open(self.path, mode=mode) as f:
+            return f.read()

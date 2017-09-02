@@ -6,10 +6,9 @@
 import functools
 import hashlib
 import os.path
-import os.path
+from os.path import abspath, join, dirname, basename
 import time
 from genericpath import exists
-from os.path import abspath, join
 from urllib.parse import urlparse
 from urllib.request import urlopen
 
@@ -83,7 +82,6 @@ class Downloader(object):
 
     def download(self, url):
 
-        parts = {}
 
         working_dir = self.working_dir if self.working_dir else ''
 
@@ -159,7 +157,9 @@ class Downloader(object):
         # If there is a query, hash it and add it to the path
         if parsed.query:
             hash = hashlib.sha224(parsed.query.encode('utf8')).hexdigest()
-            cache_path = join(cache_path, hash)
+            # We put the hash before the last path element, because that's the target faile, which gets
+            # used to figure out what the target format should be.
+            cache_path = join(dirname(cache_path), hash, basename(cache_path))
 
         if not self.cache.exists(cache_path):
 
