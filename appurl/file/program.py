@@ -29,13 +29,16 @@ class ProgramUrl(Url):
         return self.parts.path
 
     def _process_resource_url(self):
-        self.resource_url = unparse_url_dict(self.parts.__dict__,
-                                             scheme=self.parts.scheme if self.parts.scheme else 'file',
-                                             scheme_extension=False,
-                                             fragment=False)
-
         self.resource_file = basename(self.resource_url)
 
         if not self.resource_format:
             self.resource_format = file_ext(self.resource_file)
+
+    @property
+    def resource_url(self):
+        from os.path import join
+        return unparse_url_dict(self.parts.__dict__,
+                                scheme=self.parts.scheme if self.parts.scheme else 'file',
+                                scheme_extension=False,
+                                fragment=False)
 

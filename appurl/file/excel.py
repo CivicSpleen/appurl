@@ -12,19 +12,29 @@ class ExcelFileUrl(FileUrl):
 
     @classmethod
     def match(cls, url, **kwargs):
-        return url.proto == 'file' and url.target_format == 'xlsx'
+        return url.proto == 'file' and url.target_format in ('xlsx', 'xls')
+
+    @property
+    def resource_url(self):
+        from os.path import join
+        return unparse_url_dict(self.dict,
+                                scheme_extension=False,
+                                fragment=False)
+
+    @property
+    def target_file(self):
+        tf, ts = self.decompose_fragment(self.fragment, self.is_archive)
+        if  ts or tf:
+            return ts or tf
+
+        return None
+
+    @property
+    def target_format(self):
+        return 'xlsx'
 
 
-    def _process_resource_url(self):
 
-        self.resource_url = unparse_url_dict(self.__dict__,
-                                             scheme=self.scheme if self.scheme else 'file',
-                                             scheme_extension=False,
-                                             fragment=False)
 
-        self.resource_file = basename(self.resource_url)
-
-        if not self.resource_format:
-            self.resource_format = file_ext(self.resource_file)
 
 

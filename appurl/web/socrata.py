@@ -23,18 +23,21 @@ class SocrataUrl(WebUrl):
     def match(cls, url, **kwargs):
         return url.proto == 'socrata'
 
-    def _process_resource_url(self):
-        self.resource_url = unparse_url_dict(self.__dict__,
-                                             scheme_extension=False,
-                                             fragment=False,
-                                             path=join(self.path, 'rows.csv'))
 
-        self.resource_file = basename(self.path)+'.csv'
+    @property
+    def resource_url(self):
+        return unparse_url_dict(self.__dict__,
+                                scheme_extension=False,
+                                fragment=False,
+                                path=join(self.path, 'rows.csv'))
 
-        if self.resource_format is None:
-            self.resource_format = file_ext(self.resource_file)
 
-        self.target_file = self.resource_file  # _process_target() file will use this self.target_file
+
+    @property
+    def resource_file(self):
+        return basename(self.path)+'.csv'
+
+
 
     def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""

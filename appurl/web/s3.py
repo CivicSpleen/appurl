@@ -21,29 +21,34 @@ class S3Url(WebUrl):
         super().__init__(url,downloader=downloader, **kwargs)
 
 
+
     @classmethod
     def match(cls, url, **kwargs):
         return url.proto == 's3';
 
-    def _process_resource_url(self):
 
-        url_template = 'https://s3.amazonaws.com/{bucket}/{key}'
-
-        self._bucket_name = self.netloc
-        self._key = '' if not self.path else self.path.strip('/')
-
-        # noinspection PyUnresolvedReferences
-        self.resource_url = url_template.format(bucket=self._bucket_name, key=self._key)
-
-        self.resource_file = basename(self.resource_url)
-
-        if self.resource_format is None:
-            self.resource_format = file_ext(self.resource_file)
 
     @property
     def auth_resource_url(self):
         """Return the orginal S3: version of the url, with a resource_url format that will trigger boto auth"""
-        return 's3://{bucket}/{key}'.format(bucket=self._bucket_name, key=self._key)
+        return 's3://{bucket}/{key}'.format(bucket=self.bucket_name, key=self.key)
+
+
+    @property
+    def resource_url(self):
+        url_template = 'https://s3.amazonaws.com/{bucket}/{key}'
+        return url_template.format(bucket=self.bucket_name, key=self.key)
+
+    @property
+    def resource_file(self):
+        return basename(self.resource_url)
+
+    @property
+    def resource_format(self):
+        if self._resource_format:
+            return self._resource_format
+        else:
+            return file_ext(self.resource_file)
 
     def component_url(self, s, scheme_extension=None):
 
@@ -58,15 +63,16 @@ class S3Url(WebUrl):
 
         new_key = join(dirname(self.key), path)
 
-        return parse_app_url('s3://{bucket}/{key}'.format(bucket=self._bucket_name.strip('/'), key=new_key.lstrip('/')))
+        return parse_app_url('s3://{bucket}/{key}'.format(bucket=self.bucket_name.strip('/'), key=new_key.lstrip('/')))
 
     @property
     def bucket_name(self):
-        return self._bucket_name
+        return self.netloc
 
     @property
     def key(self):
-        return self._key
+        """S3 storage key, the file path"""
+        return '' if not self.path else self.path.strip('/')
 
     @property
     def object(self):

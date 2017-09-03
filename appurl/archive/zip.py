@@ -47,14 +47,17 @@ def get_file_from_zip(url):
 
     nl = list(real_files_in_zf(zf)) # Old way, but maybe gets links? : list(zf.namelist())
 
+    tf = url.target_file
+    ts = url.target_segment
+
     if not nl:
         # sometimes real_files_in_zf doesn't work at all. I don't know why it does work,
         # so I certainly don't know why it does not.
         nl = list(zf.namelist())
 
     # the target_file may be a string, or a regular expression
-    if url.target_file:
-        names = list([e for e in nl if re.search(url.target_file, e)
+    if tf:
+        names = list([e for e in nl if re.search(tf, e)
                       and not (e.startswith('__') or e.startswith('.'))
                       ])
         if len(names) > 0:
@@ -63,15 +66,15 @@ def get_file_from_zip(url):
     # The segment, if it exists, can only be an integer, and should probably be
     # '0' to indicate the first file. This clause is probably a bad idea, since
     # andy other integer is probably meaningless.
-    if url.target_segment:
+    if ts:
         try:
-            return nl[int(url.target_segment)]
+            return nl[int(ts)]
 
         except (IndexError, ValueError):
             pass
 
     # Just return the first file in the archive.
-    if not url.target_file and not url.target_segment:
+    if not tf and not ts:
         return nl[0]
     else:
         raise ZipUrlError("Could not find file in Zip for target='{}' nor segment='{}'".format(url.target_file, url.target_segment))
@@ -94,23 +97,24 @@ class ZipUrl(FileUrl):
     def _process(self):
         super()._process()
 
-    def _process_fragment(self):
+    @property
+    def target_file(self):
+
+        if self._target_file:
+            return self._target_file
 
         if self.fragment:
-            self.target_file, self.target_segment = self.decompose_fragment(self.fragment, self.is_archive)
+            tf, ts = self.decompose_fragment(self.fragment, self.is_archive)
+            if tf:
+                return tf
 
-        else:
-            self.target_file = self.target_segment = None
-
-    def _process_target_file(self):
-
-        # Handles the case of file.csv.zip, etc.
         for ext in ('csv', 'xls', 'xlsx'):
             if self.resource_file.endswith('.' + ext + '.zip'):
-                self.target_file = self.resource_file.replace('.zip', '')
+                return self.resource_file.replace('.zip', '')
 
-        if self.target_file and not self.target_format:
-            self.target_format = file_ext(self.target_file)
+        # Want to return none, so get_files_from-zip can assume to use the first file in the archive.
+        return None
+
 
     def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
@@ -131,7 +135,7 @@ class ZipUrl(FileUrl):
 
         zf = ZipFile(self.path)
 
-        self.target_file = get_file_from_zip(self)
+        self._target_file = get_file_from_zip(self)
 
         target_path = join(self.zip_dir, self.target_file)
         ensure_dir(dirname(target_path))

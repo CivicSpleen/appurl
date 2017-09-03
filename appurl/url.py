@@ -6,7 +6,7 @@
 from .util import reparse_url, unparse_url_dict, file_ext, parse_url_to_dict
 from os.path import basename, join, dirname
 from pkg_resources import iter_entry_points
-
+from traitlets import HasTraits, Unicode, Any, Dict, observe
 
 
 def match_url_classes(u_str, **kwargs):
@@ -55,8 +55,7 @@ def parse_app_url(u_str, downloader = 'default', **kwargs):
             return cls(str(u_str) if u_str else None, downloader=downloader, **kwargs)
 
 
-
-class Url(object):
+class Url(HasTraits):
     """Base class for URL Managers
 
     url: The input URL
@@ -71,33 +70,33 @@ class Url(object):
     archive_formats = ['zip']
 
     # Basic URL components
-    scheme = None
-    scheme_extension = None
-    netloc = None
-    hostname = None
-    path = None
-    params = None
-    query = None
-    fragment = None
-    fragment_query = None
-    username = None
-    password = None
-    port = None
+    scheme = Any()
+    scheme_extension = Any()
+    netloc = Any()
+    hostname = Any()
+    path = Any()
+    params = Any()
+    query = Any()
+    fragment = Any()
+    fragment_query = Dict()
+    username = Any()
+    password = Any()
+    port = Any()
 
     # Application components
-    scheme = None
-    proto = None
-    resource_url = None
-    resource_file = None
-    resource_format = None
-    target_file = None
-    target_format = None
-    target_segment = None
+    scheme = Any()
+    _proto = Any()
 
-    encoding = None # target encoding
-    headers = None # line number of headers
-    start = None # start line for data
-    end = None # end line for data
+    _resource_file = Any()
+    _resource_format = Any()
+    _target_file = Any()
+    _target_format = Any()
+    target_segment = Any()
+
+    encoding = Any() # target encoding
+    headers = Any() # line number of headers
+    start = Any() # start line for data
+    end = Any() # end line for data
 
 
     def __init__(self, url=None, downloader = None, **kwargs):
@@ -110,7 +109,10 @@ class Url(object):
             parts['resource_format'] = file_ext(parts['path'])
 
             for k, v in parts.items():
-                setattr(self, k, v)
+                try:
+                    setattr(self, k, v)
+                except AttributeError:
+                    pass #print("Can't Set: ", k, v)
         else:
             for k in "scheme scheme_extension netloc hostname path params query fragment fragment_query username password port".split():
                 setattr(self, k, kwargs.get(k))
@@ -120,13 +122,13 @@ class Url(object):
         self.scheme_extension = kwargs.get('scheme_extension', self.scheme_extension)
 
         self.scheme = kwargs.get('scheme', self.scheme)
-        self.proto = kwargs.get('proto', self.proto)
-        self.resource_url = kwargs.get('resource_url', self.resource_url)
-        self.resource_file = kwargs.get('resource_file', self.resource_file)
-        self.resource_format = kwargs.get('resource_format', self.fragment_query.get('resource_format',self.resource_format))
-        self.target_file = kwargs.get('target_file', self.target_file)
-        self.target_format = kwargs.get('target_format', self.fragment_query.get('target_format', self.target_format))
-        self.target_segment = kwargs.get('target_segment', self.target_segment)
+        self._proto = kwargs.get('proto', self.proto)
+        #self.resource_url = kwargs.get('resource_url', self.resource_url)
+        self._resource_file = kwargs.get('resource_file', self.resource_file)
+        self._resource_format = kwargs.get('resource_format', self.fragment_query.get('resource_format',self.resource_format))
+        #self.target_file = kwargs.get('target_file', self.target_file)
+        self._target_format = kwargs.get('target_format', self.fragment_query.get('target_format', self.target_format))
+        self._target_segment = kwargs.get('target_segment', self.target_segment)
 
         self.encoding = kwargs.get('encoding', self.fragment_query.get('encoding',self.encoding))
         self.headers = kwargs.get('headers', self.fragment_query.get('headers',self.headers))
@@ -141,8 +143,6 @@ class Url(object):
         self._downloader = downloader
 
         self._process()
-
-
 
     def _process(self):
         self._process_proto()
@@ -160,11 +160,7 @@ class Url(object):
             'file' for no scheme
             scheme
         """
-
-        self.proto = self.proto or \
-                     self.scheme_extension or \
-                     {'https': 'http', '': 'file'}.get(self.scheme) or \
-                     self.scheme
+        pass
 
     def _process_fragement_query(self):
         """Set fragment query values"""
@@ -172,43 +168,92 @@ class Url(object):
         # These are copied from the URl with setarrt in the constructor
         pass
 
-
     def _process_fragment(self):
         """Reassign the fragment values to one or both of the target_file and target_segment"""
 
-        if self.fragment:
-            target_file, self.target_segment = self.decompose_fragment(self.fragment, self.is_archive)
-        else:
-            target_file = self.target_segment = None
-
-        if not self.target_file and target_file:
-            self.target_file = target_file
+        pass
 
     def _process_resource_url(self):
         """Set the resource_url, resource_file and resource_format"""
-
-        self.resource_url = unparse_url_dict(self.__dict__,
-                                             scheme=self.scheme if self.scheme else 'file',
-                                             scheme_extension=False,
-                                             fragment_query=False,
-                                             fragment=False)
-
-        self.resource_file = basename(self.path)
-
-        if not self.resource_format:
-            self.resource_format = file_ext(self.resource_file)
+        pass
 
     def _process_target_file(self):
         """Set the target_file and target_format"""
+        pass
 
-        if not self.target_file:
-            self.target_file = basename(self.path)
+    @property
+    def proto(self):
+        return self._proto or \
+               self.scheme_extension or \
+               {'https': 'http', '': 'file'}.get(self.scheme) or \
+               self.scheme
 
-        if not self.target_format:
-            self.target_format = file_ext(self.target_file)
+    @property
+    def resource_url(self):
+        return unparse_url_dict(self.dict,
+                                scheme=self.scheme if self.scheme else 'file',
+                                scheme_extension=False,
+                                fragment_query=False,
+                                fragment=False)
 
-        if not self.target_format:
-            self.target_format = self.resource_format
+    @property
+    def resource_file(self):
+        return basename(self.path)
+
+    @property
+    def resource_format(self):
+        if self._resource_format:
+            return self._resource_format
+        else:
+            return file_ext(self.resource_file)
+
+    @property
+    def target_url(self):
+        raise NotImplementedError()
+
+    @property
+    def target_file(self):
+
+        if self._target_file:
+            return self._target_file
+
+        if self.fragment:
+            tf, ts = self.decompose_fragment(self.fragment, self.is_archive)
+            if tf:
+                return tf
+
+        return self.resource_file
+
+    @property
+    def target_segment(self):
+        if self.fragment:
+            tf, ts = self.decompose_fragment(self.fragment, self.is_archive)
+            return ts
+        else:
+            return None
+
+    @property
+    def target_format(self):
+
+        target_format = None
+
+        if self._target_format:
+            target_format = self._target_format
+
+        if not target_format and self.target_file:
+            target_format = file_ext(self.target_file)
+
+        if not target_format:
+            target_format = self.resource_format
+
+        return target_format
+
+
+    @observe('path')
+    def _observe_path(self, change):
+        pass
+
+
 
     @property
     def is_archive(self):
@@ -224,6 +269,9 @@ class Url(object):
     def decompose_fragment(cls, frag, is_archive):
 
         from urllib.parse import unquote_plus
+
+        if not frag:
+            return None, None
 
         frag_parts = unquote_plus(frag).split(';')
 
@@ -422,7 +470,7 @@ class Url(object):
                "proto resource_url resource_file resource_format target_file target_format " \
                "encoding target_segment"
 
-        return dict((k, v) for k, v in self.__dict__.items() if k in keys)
+        return dict((k, getattr(self,v.name)) for k, v in self.traits().items() if k in keys)
 
     def _update_parts(self):
         """Update the fragement_query. Set the attribute for the query value to False to delete it from
@@ -438,7 +486,6 @@ class Url(object):
         #    self.rebuild_fragment()
 
 
-
     def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
         raise NotImplementedError("get_resource not implemented in "+self.__class__.__name__)
@@ -450,17 +497,17 @@ class Url(object):
         raise NotImplementedError("get_target not implemented in "+self.__class__.__name__)
 
     def __deepcopy__(self, memo):
-        d = self.__dict__.copy()
+        d = self.dict.copy()
         return type(self)(None, downloader=self._downloader, **d)
 
     def __copy__(self):
-        d = self.__dict__.copy()
+        d = self.dict.copy()
         return type(self)(None, downloader=self._downloader, **d,)
 
     def clone(self, **kwargs):
         from copy import copy
 
-        d = self.__dict__.copy()
+        d = self.dict.copy()
         c = type(self)(None, downloader=self._downloader, **d)
 
         c._update_parts()
@@ -476,5 +523,5 @@ class Url(object):
 
     def __str__(self):
         self._update_parts()
-        return unparse_url_dict(self.__dict__)
+        return unparse_url_dict(self.dict)
 

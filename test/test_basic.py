@@ -81,6 +81,20 @@ class BasicTests(unittest.TestCase):
         self.assertEqual(0, errors)
 
 
+    def test_traits(self):
+
+        u = Url("http://example.com/foo/bar.csv")
+
+        self.assertEquals('http',u.proto)
+        self.assertEquals('/foo/bar.csv', u.path)
+
+        print(str(u))
+
+        u.path = '/bar/baz.csv'
+        print(str(u))
+
+
+
     def test_entry_points(self):
 
         self.assertIsInstance(parse_app_url('s3://bucket.com/foo/bar/baz.zip'), S3Url)
@@ -103,7 +117,7 @@ class BasicTests(unittest.TestCase):
         with open(data_path('sources.csv')) as f:
             for e in DictReader(f):
                 u = parse_app_url(e['url'], downloader=dldr)
-
+                print(e['name'])
                 if not e['resource_class']:
                     continue
 
@@ -127,13 +141,15 @@ class BasicTests(unittest.TestCase):
                 if not e['class']:
                     continue
 
-                print(e['in_url'])
-                u = parse_app_url(e['in_url'])
 
-                self.assertEquals(e['url'], str(u))
-                self.assertEqual(e['resource_url'], str(u.resource_url))
-                self.assertEqual(e['resource_file'], u.resource_file)
-                self.assertEqual(e['target_file'], u.target_file or '')
+                u = parse_app_url(e['in_url'])
+                print(u.__class__.__name__, e['in_url'])
+
+
+                self.assertEquals(e['url'], str(u), e['in_url'])
+                self.assertEqual(e['resource_url'], str(u.resource_url), e['in_url'])
+                self.assertEqual(e['resource_file'], u.resource_file, e['in_url'])
+                self.assertEqual(e['target_file'], u.target_file or '', e['in_url'])
 
 
     def test_component(self):
@@ -206,7 +222,7 @@ class BasicTests(unittest.TestCase):
         self.assertEqual('cdss.ca.gov-residential_care_facilities-2017-ca-7.csv', u.target_file)
         self.assertEqual('facilities', u.target_segment)
 
-
+    @unittest.skip("Not re-implemented yet'")
     @unittest.skipIf(platform.system() == 'Windows','ProgramSources don\'t work on Windows')
     def test_program(self):
 
@@ -264,9 +280,6 @@ class BasicTests(unittest.TestCase):
         print(u.resource_file, u.resource_format)
         print(u.target_file, u.target_format)
 
-
-
-
     def test_socrata(self):
 
         u_s = 'https://data.lacounty.gov/api/views/8rdv-6nb6/rows.csv?accessType=DOWNLOAD'
@@ -275,5 +288,5 @@ class BasicTests(unittest.TestCase):
         print(u.resource_url)
 
 
-if __name__ == '__main__':
-    unittest.main()
+#if __name__ == '__main__':
+#    unittest.main()

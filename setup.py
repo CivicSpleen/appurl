@@ -33,6 +33,8 @@ setup(
             #
             # File Urls
             ".csv = appurl.file.csv:CsvFileUrl",
+            ".xlsx = appurl.file.excel:ExcelFileUrl",
+            ".xls = appurl.file.excel:ExcelFileUrl",
             "file: = appurl.file.file:FileUrl",
         ]
     }
