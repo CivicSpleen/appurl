@@ -8,4 +8,5 @@ from .file import *
 from .archive import *
 from .web import *
 from .util import get_cache
+from .exc import DownloadError, AppUrlError
 

@@ -12,7 +12,7 @@ class ExcelFileUrl(FileUrl):
 
     @classmethod
     def match(cls, url, **kwargs):
-        return url.proto == 'file' and url.target_format in ('xlsx', 'xls')
+        return url.proto == 'file' and url.resource_format in ('xlsx', 'xls')
 
     @property
     def resource_url(self):
@@ -23,15 +23,37 @@ class ExcelFileUrl(FileUrl):
 
     @property
     def target_file(self):
-        tf, ts = self.decompose_fragment(self.fragment, self.is_archive)
-        if  ts or tf:
-            return ts or tf
+        return self.fragment[0]
 
-        return None
+    @property
+    def target_segment(self):
+        return self.fragment[0]
 
     @property
     def target_format(self):
         return 'xlsx'
+
+    def join(self, s, scheme_extension=None):
+        return super().join(s, scheme_extension)
+
+    def join_dir(self, s, scheme_extension=None):
+        return super().join_dir(s, scheme_extension)
+
+    def join_target(self, tf):
+
+        try:
+            tf = tf.path
+        except:
+            pass
+
+        u = self.clone()
+        u.fragment = [tf,None] # In case its a tuple, don't edit in place
+        return u
+
+    def get_target(self, mode=None):
+        return self # Like super method, but don't clear the fragment; it's needed in the row generator
+
+
 
 
 

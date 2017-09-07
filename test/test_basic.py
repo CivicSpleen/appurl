@@ -116,10 +116,12 @@ class BasicTests(unittest.TestCase):
 
         with open(data_path('sources.csv')) as f:
             for e in DictReader(f):
-                u = parse_app_url(e['url'], downloader=dldr)
+
                 print(e['name'])
                 if not e['resource_class']:
                     continue
+
+                u = parse_app_url(e['url'], downloader=dldr)
 
                 self.assertEqual(e['url_class'], u.__class__.__name__, e['name'])
                 self.assertEqual(e['resource_format'], u.resource_format, e['name'])
@@ -141,10 +143,7 @@ class BasicTests(unittest.TestCase):
                 if not e['class']:
                     continue
 
-
                 u = parse_app_url(e['in_url'])
-                print(u.__class__.__name__, e['in_url'])
-
 
                 self.assertEquals(e['url'], str(u), e['in_url'])
                 self.assertEqual(e['resource_url'], str(u.resource_url), e['in_url'])
@@ -160,9 +159,12 @@ class BasicTests(unittest.TestCase):
                 b = parse_app_url(e['base_url'])
                 c = parse_app_url(e['component_url'])
 
-                self.assertEquals(str(b.component_url(c)), e['final_url'])
+                self.assertEquals(e['class'], b.__class__.__name__)
 
+                self.assertEquals(str(b.join_dir(c)), e['join_dir'])
+                self.assertEquals(str(b.join(c)), e['join'])
 
+                self.assertEqual(str(b.join_target(c)), e['join_target'])
 
     def test_base_url(self):
         """Simple test of splitting and recombining"""
@@ -183,17 +185,6 @@ class BasicTests(unittest.TestCase):
         u = parse_app_url('/foo/bar/file.csv')
         print(u.target_format)
 
-    def test_component_url(self):
-
-        with open(data_path('components.csv')) as f:
-            for l in DictReader(f):
-                base_url = parse_app_url(l['base_url'])
-
-                #component_url = l['component_url']
-                #curl = base_url.component_url(component_url)
-                #self.assertEquals(l['final_url'], curl)
-
-                print(base_url)
 
 
     def test_parse_file_urls(self):
@@ -209,18 +200,6 @@ class BasicTests(unittest.TestCase):
             p = parse_app_url(i)
             self.assertEqual(o, p.path)
             self.assertEqual(u, str(p))
-
-    def test_metatab_url(self):
-
-        urlstr = 'metatab+http://s3.amazonaws.com/library.metatab.org/cdss.ca.gov-residential_care_facilities-2017-ca-7.csv#facilities'
-
-        u = Url(urlstr)
-
-        self.assertEqual('http', u.scheme)
-        self.assertEqual('metatab', u.proto)
-        self.assertEqual('http://s3.amazonaws.com/library.metatab.org/cdss.ca.gov-residential_care_facilities-2017-ca-7.csv', u.resource_url)
-        self.assertEqual('cdss.ca.gov-residential_care_facilities-2017-ca-7.csv', u.target_file)
-        self.assertEqual('facilities', u.target_segment)
 
     @unittest.skip("Not re-implemented yet'")
     @unittest.skipIf(platform.system() == 'Windows','ProgramSources don\'t work on Windows')
@@ -286,6 +265,45 @@ class BasicTests(unittest.TestCase):
         u = parse_app_url(u_s)
         print(type(u))
         print(u.resource_url)
+
+    def test_fragment(self):
+
+        u = Url('http://example.com/file.csv')
+        self.assertEqual((None,None), u.fragment)
+        self.assertEqual('file.csv', u.target_file)
+        self.assertEqual(None, u.target_segment)
+        print(str(u))
+
+        u = Url('http://example.com/file.csv#a')
+        self.assertEqual(('a', None), u.fragment)
+        self.assertEqual('a', u.target_file)
+        self.assertEqual(None, u.target_segment)
+        print(str(u))
+
+        u = Url('http://example.com/file.csv#a;b')
+        self.assertEqual('a', u.target_file)
+        self.assertEqual('b', u.target_segment)
+        print(str(u))
+
+    def test_targets(self):
+
+        u=parse_app_url('http://library.metatab.org/example.com-example_data_package-2017-us-1.xlsx')
+
+        tfu = u.join_target('random-names')
+
+        self.assertEqual(
+            'http://library.metatab.org/example.com-example_data_package-2017-us-1.xlsx#random-names',
+            str(tfu))
+
+        r = tfu.get_resource()
+
+        self.assertTrue(str(r)
+                        .endswith('library.metatab.org/example.com-example_data_package-2017-us-1.xlsx#random-names'))
+
+        t = r.get_target()
+
+        self.assertTrue(str(t)
+                        .endswith('library.metatab.org/example.com-example_data_package-2017-us-1.xlsx#random-names'))
 
 
 #if __name__ == '__main__':

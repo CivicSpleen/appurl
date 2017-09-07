@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import unittest
 
-from appurl.url import parse_app_url
+from appurl.url import parse_app_url, Url
 from appurl.util import get_cache
 from appurl.web.download import Downloader
 from appurl.archive.zip import ZipUrl
@@ -106,13 +106,55 @@ class TestIssues(unittest.TestCase):
         self.assertEqual('file', t.proto)
         self.assertTrue(t.exists())
 
-    def test_file_class(self):
 
-        u = parse_app_url('file:foo/bar/excel.xls')
+    def test_fragement_ts_tf(self):
 
-        self.assertEqual('excel.xls', u.resource_file)
-        self.assertEqual(None, u.target_file)
+        url = Url('http://example.com/foo.csv#a;b&encoding=utf8')
 
+        print(url.dict)
+
+        return
+
+        url = parse_app_url('http://example.com/foo.csv#a;b&encoding=utf8')
+
+        print(url.dict)
+
+        self.assertEquals('utf8', url.encoding)
+
+        url.encoding = 'ascii'
+        url.start = 5
+
+        self.assertEquals('http://example.com/foo.csv#a;b&encoding=ascii&start=5', str(url))
+
+    def test_xlsx_fragment(self):
+
+        url = parse_app_url('http://example.com/renter_cost_excel07.xlsx#2')
+
+        print(url.dict)
+
+    def test_xsx_zip_fragment(self):
+
+        url = parse_app_url('http://public.source.civicknowledge.com/example.com/sources/test_data.zip#renter_cost_excel07.xlsx;Sheet1')
+
+        print(url.fragment)
+
+    def test_join_target_xls(self):
+        u = parse_app_url('file:/a/file.xlsx')
+
+        jt = u.join_target('target')
+        print(jt.dict)
+        self.assertEquals('file:/a/file.xlsx#target', str(jt))
+
+    def test_join_target_xls(self):
+        u = parse_app_url('file:/a/file.xlsx#foobnar')
+
+        print(type(u))
+
+    def test_parse_s3(self):
+
+        u = parse_app_url(('s3://library.metatab.org'))
+
+        print(u)
 
 
 

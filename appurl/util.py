@@ -79,6 +79,14 @@ def parse_url_to_dict(url, assume_localhost=False):
     # but we expect unique values
     frag_query = { k:v[0] for k, v in  (parse_qs(frag_rem) if p.fragment else {}).items()  }
 
+    if frag:
+        frag_sub_parts = frag.split(';')
+
+        if len(frag_sub_parts) < 2:
+            frag_sub_parts = [frag_sub_parts[0], None]
+
+    else:
+        frag_sub_parts = [None, None]
 
     return {
         'scheme': scheme,
@@ -88,7 +96,7 @@ def parse_url_to_dict(url, assume_localhost=False):
         'path': p.path,
         'params': p.params,
         'query': p.query,
-        'fragment': frag if frag else None,
+        'fragment':  frag_sub_parts,
         'fragment_query': frag_query,
         'username': p.username,
         'password': p.password,
@@ -101,6 +109,8 @@ def unparse_url_dict(d, **kwargs):
 
     d.update(kwargs)
 
+    if '_fragment' in d and 'fragment' not in d:
+        d['fragment'] = d['_fragment']
 
     if 'netloc' in d and d['netloc']:
         host_port = d['netloc']
@@ -141,9 +151,17 @@ def unparse_url_dict(d, **kwargs):
         url += '?' + d['query']
 
     if d.get('fragment') or d.get('fragment_query'):
-        seg = (';'.join(quote_plus(e) for e in d['fragment'].split(';'))) if d.get('fragment') else ''
+
+        if isinstance(d.get('fragment'),(list, tuple)):
+
+            seg = ';'.join(quote_plus(str(e)) for e in [ e for e in d.get('fragment') if e])
+        else:
+            seg = quote_plus(d.get('fragment'))
+
         query = '&'+urlencode(d.get('fragment_query'),doseq=True) if d.get('fragment_query') else ''
-        url += "#"+seg+unquote(query)
+
+        if seg or query:
+            url += "#"+seg+unquote(query)
 
     return url
 

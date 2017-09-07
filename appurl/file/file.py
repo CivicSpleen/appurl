@@ -4,7 +4,9 @@
 """Base class for file URLs, URLs on a local file system. These are URLs that can be opened and read"""
 
 from appurl.url import Url
-from os.path import exists
+from appurl.util import ensure_dir
+from os.path import exists, isdir, dirname
+
 
 class FileUrl(Url):
     def __init__(self, url=None, downloader=None,**kwargs):
@@ -14,6 +16,15 @@ class FileUrl(Url):
 
     def exists(self):
         return exists(self.path)
+
+    def isdir(self):
+        return isdir(self.path)
+
+    def dirname(self):
+        return dirname(self.path)
+
+    def ensure_dir(self):
+        ensure_dir(self.path)
 
     def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
@@ -33,3 +44,16 @@ class FileUrl(Url):
         """Return contents of file"""
         with open(self.path, mode=mode) as f:
             return f.read()
+
+    def join_target(self, tf):
+        """For normal files, joining a target assumes the target is a child of the current targets
+        directory"""
+
+        try:
+            tf = tf.path
+        except:
+            pass
+
+        return self.clone().join_dir(tf)
+
+

@@ -177,11 +177,14 @@ class Downloader(object):
                         cache_path = join(dn + str(i), bn)
                         self.cache.makedirs(os.path.dirname(cache_path))
                         break
-                    except DirectoryExpected:
+                    except DirectoryExpected as e2:
                         continue
                     except DirectoryExists:
                         pass  # ? No idea what's supposed to happen here.
                     raise e
+                else:
+                    raise e
+
 
         try:
             from filelock import FileLock

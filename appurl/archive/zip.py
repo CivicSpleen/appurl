@@ -103,10 +103,8 @@ class ZipUrl(FileUrl):
         if self._target_file:
             return self._target_file
 
-        if self.fragment:
-            tf, ts = self.decompose_fragment(self.fragment, self.is_archive)
-            if tf:
-                return tf
+        if self.fragment[0]:
+            return self.fragment[0]
 
         for ext in ('csv', 'xls', 'xlsx'):
             if self.resource_file.endswith('.' + ext + '.zip'):
@@ -115,6 +113,16 @@ class ZipUrl(FileUrl):
         # Want to return none, so get_files_from-zip can assume to use the first file in the archive.
         return None
 
+    def join_target(self, tf):
+        u = self.clone()
+
+        try:
+            tf = tf.path
+        except:
+            pass
+
+        u.fragment = [tf, u.fragment[1]] # In case its a tuple, don't edit in place
+        return u
 
     def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""

@@ -48,16 +48,26 @@ class WebUrl(Url):
 
         return ru
 
-    def component_url(self, s, scheme_extension=None):
+    def join_dir(self, s, scheme_extension=None):
 
 
         if self.resource_format in ('zip','xlsx'):
             u = Url(s)
             return self.clone(fragment=u.path)
         else:
-            return super().component_url(s, scheme_extension)
+            return super().join_dir(s, scheme_extension)
 
+    def join_target(self, tf):
 
+            if self.target_format:
+                u = self.clone()
+                u.fragment = [tf, self.fragment[1]]
+            else:
+                # Assuming that if there is no target format, there is no actual target file
+                # and the URL is specifying a directory.
+                u = self.join(tf)
+
+            return u
 
 
 
