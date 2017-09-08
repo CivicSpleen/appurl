@@ -18,6 +18,13 @@ setup(
     author_email='eric@busboom.org',
     description='Url manipulation for extended application urls',
     zip_safe=True,
+    install_requires=[
+        'fs >= 2',
+        'boto',
+        'requests',
+        'rowgenerators',
+        'appurl'
+    ],
     entry_points = {
         'appurl.urls' : [
             "* = appurl.url:Url",
