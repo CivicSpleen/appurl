@@ -424,7 +424,9 @@ class Url(object):
 
     def dirname(self):
         """Return the dirname of the path"""
-        return dirname(self.path)
+        u = self.clone()
+        u.path = dirname(self.path)
+        return u
 
     def clear_fragment(self):
         """Return a copy of the URL with no fragment components"""
@@ -461,29 +463,7 @@ class Url(object):
 
         return o
 
-    def rebuild_fragment(self):
 
-        return
-
-        second_sep = ''
-        frag = ''
-
-        frag_tf, frag_ts = self.old_decompose_fragment(self.fragment, self.is_archive)
-
-        new_ts = new_tf = None
-
-
-
-
-        if self.target_file and self.target_file != basename(self.path):
-            frag = self.target_file
-            second_sep = ';'
-
-        if (self.target_segment or self.target_segment == 0) and (self.target_segment != self.target_file):
-            frag += second_sep
-            frag += str(self.target_segment)
-
-        self.fragment = frag
 
     def as_type(self, cls):
         """Return the URL transformed to a different class"""
@@ -516,13 +496,18 @@ class Url(object):
 
     def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
-        raise NotImplementedError("get_resource not implemented in " + self.__class__.__name__)
+        raise NotImplementedError(("get_resource not implemented in {} for '{}'. "
+                                   "You may need to install a python mpdule for this type of url")
+                                  .format(self.__class__.__name__, str(self)))
 
     def get_target(self, mode=None):
         """Get the contents of the target, and save it to the cache, returning a file-like object
         :param mode:
         """
-        raise NotImplementedError("get_target not implemented in " + self.__class__.__name__)
+        raise NotImplementedError(("get_target not implemented in {} for '{}'"
+                                   "You may need to install a python mpdule for this type of url"
+                                   )
+                                  .format(self.__class__.__name__, str(self)))
 
     def __deepcopy__(self, memo):
         d = self.dict.copy()

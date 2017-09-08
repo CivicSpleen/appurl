@@ -156,12 +156,17 @@ class ZipUrl(FileUrl):
         with io.open(target_path, 'wb') as f, zf.open(self.target_file) as flo:
             copy_file_or_flo(flo, f)
 
+        fq = self.fragment_query
+
+        if 'resource_format' in fq:
+            del fq['resource_format']
+
+        if 'resource_file' in fq:
+            del fq['resource_file']
+
         return parse_app_url(target_path,
-                             fragment_query=self.fragment_query,
-                             fragement=self.fragment,
+                             fragment_query=fq,
+                             fragment=[self.target_segment,None],
                              scheme_extension=self.scheme_extension,
                              # Clear out the resource info so we don't get a ZipUrl
-                             resource_file=False,
-                             resource_format=False,
-                             resource_url=False
                              )

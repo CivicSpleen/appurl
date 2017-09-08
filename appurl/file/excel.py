@@ -10,6 +10,11 @@ from appurl.util import unparse_url_dict, file_ext
 
 class ExcelFileUrl(FileUrl):
 
+
+
+    def __init__(self, url=None, downloader=None, **kwargs):
+        super().__init__(url, downloader, **kwargs)
+
     @classmethod
     def match(cls, url, **kwargs):
         return url.proto == 'file' and url.resource_format in ('xlsx', 'xls')

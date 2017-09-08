@@ -117,9 +117,13 @@ class BasicTests(unittest.TestCase):
         with open(data_path('sources.csv')) as f:
             for e in DictReader(f):
 
+                if e['name'] != 'mz_no_zip':
+                    continue
+
                 print(e['name'])
                 if not e['resource_class']:
                     continue
+
 
                 u = parse_app_url(e['url'], downloader=dldr)
 
@@ -131,6 +135,8 @@ class BasicTests(unittest.TestCase):
                 self.assertEqual(e['resource_format'], r.resource_format, e['name'])
 
                 t = r.get_target()
+                print(t)
+                print(type(t))
                 self.assertEqual(e['target_class'], t.__class__.__name__, e['name'])
                 self.assertEqual(e['target_format'], t.target_format, e['name'])
                 self.assertTrue(exists(t.path))
@@ -159,12 +165,14 @@ class BasicTests(unittest.TestCase):
                 b = parse_app_url(e['base_url'])
                 c = parse_app_url(e['component_url'])
 
-                self.assertEquals(e['class'], b.__class__.__name__)
+                self.assertEquals(e['class'], b.__class__.__name__, e['base_url'])
 
-                self.assertEquals(str(b.join_dir(c)), e['join_dir'])
-                self.assertEquals(str(b.join(c)), e['join'])
+                self.assertEquals(e['join_dir'], str(b.join_dir(c)), e['base_url'])
+                self.assertEquals( e['join'], str(b.join(c)), e['base_url'])
 
-                self.assertEqual(str(b.join_target(c)), e['join_target'])
+                self.assertEqual(str(e['join_target']), str(b.join_target(c)), e['base_url'])
+
+
 
     def test_base_url(self):
         """Simple test of splitting and recombining"""
@@ -269,13 +277,13 @@ class BasicTests(unittest.TestCase):
     def test_fragment(self):
 
         u = Url('http://example.com/file.csv')
-        self.assertEqual((None,None), u.fragment)
+        self.assertEqual((None,None), tuple(u.fragment))
         self.assertEqual('file.csv', u.target_file)
         self.assertEqual(None, u.target_segment)
         print(str(u))
 
         u = Url('http://example.com/file.csv#a')
-        self.assertEqual(('a', None), u.fragment)
+        self.assertEqual(('a', None), tuple(u.fragment))
         self.assertEqual('a', u.target_file)
         self.assertEqual(None, u.target_segment)
         print(str(u))
