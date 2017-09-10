@@ -11,7 +11,7 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='appurl',
-    version='0.1.0',
+    version='0.1.1',
     url='https://github.com/CivicKnowledge/appurl',
     license='MIT',
     author='Eric Busboom',
@@ -21,10 +21,8 @@ setup(
     install_requires=[
         'fs >= 2',
         'boto',
-        'requests',
-        'rowgenerators',
-        'appurl'
-    ],
+        'requests'
+        ],
     entry_points = {
         'appurl.urls' : [
             "* = appurl.url:Url",
