@@ -28,15 +28,29 @@ class ExcelFileUrl(FileUrl):
 
     @property
     def target_file(self):
+        # This one should probably thow an exception, to force user to use target_segment.
         return self.fragment[0]
 
     @property
     def target_segment(self):
-        return self.fragment[0]
+        return self.fragment[1] if self.fragment[1] else self.fragment[0]
 
     @property
     def target_format(self):
         return 'xlsx'
+
+    def list(self, list_self=False):
+
+        from xlrd import open_workbook
+
+        wb = open_workbook(filename=self.path)
+
+        def _l():
+            return list(self.set_target_segment(sheet) for sheet in wb.sheet_names())
+
+        return ( [self] if list_self else [] ) + _l()
+
+
 
     def join(self, s, scheme_extension=None):
         return super().join(s, scheme_extension)

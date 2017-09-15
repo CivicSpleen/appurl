@@ -26,6 +26,16 @@ class FileUrl(Url):
     def ensure_dir(self):
         ensure_dir(self.path)
 
+    def list(self):
+
+        if self.isdir():
+            from os import listdir
+
+            return [ u for e in listdir(self.path) for u in self.join(e).list() ]
+
+        else:
+            return [self]
+
     def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
 

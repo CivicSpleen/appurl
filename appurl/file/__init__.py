@@ -5,5 +5,6 @@
 
 from .file import FileUrl
 from .program import ProgramUrl
+from .python import PythonUrl
 from .csv import CsvFileUrl
 from .excel import ExcelFileUrl

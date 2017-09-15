@@ -20,6 +20,14 @@ class WebUrl(Url):
         """Return True if this handler can handle the input URL"""
         return url.scheme.startswith('http')
 
+    def list(self):
+        """Return a list of this URL with the fragments from listing the resource"""
+
+        return list(self.set_fragment(u.fragment) for u in self.get_resource().list())
+
+
+
+
     @property
     def auth_resource_url(self):
         """Return An S3: version of the url, with a resource_url format that will trigger boto auth"""

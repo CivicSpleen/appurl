@@ -95,7 +95,7 @@ class Url(object):
     _resource_format = None
     _target_file = None
     _target_format = None
-    target_segment = None
+    _target_segment = None
 
     encoding = None  # target encoding
     headers = None  # line number of headers
@@ -162,15 +162,22 @@ class Url(object):
 
     @fragment.setter
     def fragment(self, v):
-
+        """Set the fragment in place"""
         assert isinstance(v, (list, tuple, type(None), str)), v
 
         if isinstance(v, str):
+            # One string is the target_file
             self._fragment = [v, None]
         elif isinstance(v, (list, tuple)):
             self._fragment = list(v)
         else:
             self._fragment = [None, None]
+
+    def set_fragment(self, f):
+        """Return a clone with the fragment set"""
+        u = self.clone()
+        u.fragment = f
+        return u
 
 
     @property
@@ -224,8 +231,14 @@ class Url(object):
         return self.resource_file
 
     @target_file.setter
-    def target_file(self):
-        raise NotImplementedError()
+    def target_file(self,v):
+        self.fragment[0] = v
+
+    def set_target_file(self, v):
+        """Return a clone with a target_file set"""
+        u = self.clone()
+        u.fragment[0] = v
+        return u
 
     @property
     def target_segment(self):
@@ -235,8 +248,15 @@ class Url(object):
             return None
 
     @target_segment.setter
-    def target_segment(self):
-        raise NotImplementedError()
+    def target_segment(self,v):
+        self.fragment[1] = v
+
+    def set_target_segment(self, v):
+        """Return a clone with a target_file set"""
+        u = self.clone()
+        u.fragment[1] = v
+        return u
+
 
     @property
     def target_format(self):
@@ -260,6 +280,10 @@ class Url(object):
         return target_format
 
 
+
+    def list(self):
+        """Return URLS for files contained in an container"""
+        return [self]
 
     @property
     def is_archive(self):
@@ -521,6 +545,8 @@ class Url(object):
 
         d = self.dict.copy()
         c = type(self)(None, downloader=self._downloader, **d)
+
+        c.fragment = self.fragment
 
         c._update_parts()
 

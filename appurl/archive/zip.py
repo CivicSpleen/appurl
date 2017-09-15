@@ -51,6 +51,9 @@ class ZipUrl(FileUrl):
         # Want to return none, so get_files_from-zip can assume to use the first file in the archive.
         return None
 
+
+
+
     def join_target(self, tf):
         u = self.clone()
 
@@ -108,6 +111,15 @@ class ZipUrl(FileUrl):
                              scheme_extension=self.scheme_extension,
                              # Clear out the resource info so we don't get a ZipUrl
                              )
+
+    def list(self):
+        """List the files in the referenced Zip file"""
+
+        if self.target_file:
+            return list( self.set_target_segment(tl.target_segment) for tl in self.get_target().list() )
+        else:
+            return list(self.set_target_file(rf) for rf in ZipUrl.real_files_in_zf(ZipFile(self.path)))
+
 
     @staticmethod
     def get_file_from_zip(url):

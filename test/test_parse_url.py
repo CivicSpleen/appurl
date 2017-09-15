@@ -136,15 +136,32 @@ class TestUrlParse(unittest.TestCase):
         print(u.get_resource())
 
 
-    def test_set_class(self):
-        pass
+    def test_python_url(self):
 
+        from appurl.file import python
+        from rowgenerators import get_generator
+        from types import ModuleType
 
+        import sys
 
+        foo = ModuleType('foo')
+        sys.modules['foo'] = foo
+        foo.bar = ModuleType('bar')
+        sys.modules['foo.bar'] = foo.bar
+        foo.bar.baz = ModuleType('baz')
+        sys.modules['foo.bar.baz'] = foo.bar.baz
 
+        def foobar(*args, **kwargs):
+            for i in range(10):
+                yield i
 
+        foo.bar.baz.foobar = foobar
 
+        u = parse_app_url("python:foo.bar.baz#foobar")
 
+        g = get_generator(u)
+
+        self.assertEqual(45, sum(list(g)))
 
 if __name__ == '__main__':
     unittest.main()

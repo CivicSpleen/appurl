@@ -11,7 +11,7 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='appurl',
-    version='0.1.1',
+    version='0.1.2',
     url='https://github.com/CivicKnowledge/appurl',
     license='MIT',
     author='Eric Busboom',
@@ -27,7 +27,7 @@ setup(
         'appurl.urls' : [
             "* = appurl.url:Url",
 
-            #
+            # Web Urls
             "http: = appurl.web.web:WebUrl",
             "https: = appurl.web.web:WebUrl",
             "s3: = appurl.web.s3:S3Url",
@@ -41,6 +41,8 @@ setup(
             ".xlsx = appurl.file.excel:ExcelFileUrl",
             ".xls = appurl.file.excel:ExcelFileUrl",
             "file: = appurl.file.file:FileUrl",
+            "program+ = appurl.file.program:ProgramUrl",
+            "python: = appurl.file.python:PythonUrl",
         ]
     }
 )

@@ -5,7 +5,7 @@ from copy import deepcopy
 from csv import DictReader, DictWriter
 import platform
 from csv import DictReader
-from os.path import exists
+from os.path import exists, dirname
 
 from appurl.util import nuke_cache
 from appurl.web.download import Downloader
@@ -312,6 +312,28 @@ class BasicTests(unittest.TestCase):
 
         self.assertTrue(str(t)
                         .endswith('library.metatab.org/example.com-example_data_package-2017-us-1.xlsx#random-names'))
+
+
+    def test_list(self):
+
+        import appurl
+
+        u = parse_app_url(dirname(appurl.__file__))
+
+        for su in u.list():
+            print(su)
+
+
+        return
+
+        u = parse_app_url('http://public.source.civicknowledge.com/example.com/sources/test_data.zip')
+
+        print(type(u))
+
+        for su in u.list():
+            for ssu in su.list():
+                print(ssu)
+
 
 
 #if __name__ == '__main__':

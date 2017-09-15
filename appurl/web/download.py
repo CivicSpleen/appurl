@@ -56,7 +56,7 @@ class Resource(object):
 
 
 class Downloader(object):
-    def __init__(self, cache, account_accessor=None, logger=None,
+    def __init__(self, cache=None, account_accessor=None, logger=None,
                  working_dir='', callback=None):
         """
         Download and cache files, via HTTP and FTP, with retry and decompression.
@@ -70,12 +70,22 @@ class Downloader(object):
         :return:
         """
 
-        self.cache = cache
+        self._cache = cache
         self.account_acessor = account_accessor
         self.logger = logger
         self.working_dir = working_dir
         self.callback = callback
         self.clean = False
+
+    @property
+    def cache(self):
+        if not self._cache:
+            from appurl import get_cache
+            qn = self.__module__+'.'+self.__class__.__qualname__
+            self._cache = get_cache(qn)
+
+
+        return self._cache
 
     def get_resource(url):
         pass
