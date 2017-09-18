@@ -72,7 +72,6 @@ class Url(object):
 
     downloader = None
 
-
     # Basic URL components
     scheme = None
     scheme_extension = None

@@ -156,6 +156,11 @@ class TestIssues(unittest.TestCase):
 
         print(u)
 
+    def test_join_file_urls(self):
+
+        us1 = 'file:documentation.md'
+        us2 = ''
+
 
 
 if __name__ == '__main__':
