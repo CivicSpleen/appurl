@@ -1,6 +1,3 @@
-from distutils.core import setup
-
-
 from setuptools import setup
 import sys
 import os
@@ -11,12 +8,13 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='appurl',
-    version='0.1.3',
+    version='0.1.4',
     url='https://github.com/CivicKnowledge/appurl',
     license='MIT',
     author='Eric Busboom',
     author_email='eric@busboom.org',
     description='Url manipulation for extended application urls',
+    packages=['appurl'],
     zip_safe=True,
     install_requires=[
         'fs >= 2',
