@@ -8,13 +8,13 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='appurl',
-    version='0.1.4',
+    version='0.1.5',
     url='https://github.com/CivicKnowledge/appurl',
     license='MIT',
     author='Eric Busboom',
     author_email='eric@busboom.org',
     description='Url manipulation for extended application urls',
-    packages=['appurl'],
+    packages=['appurl','appurl.archive','appurl.file','appurl.web'],
     zip_safe=True,
     install_requires=[
         'fs >= 2',
