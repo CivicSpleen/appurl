@@ -49,7 +49,7 @@ def parse_app_url(u_str, downloader='default', **kwargs):
 
     if downloader == 'default':
         from appurl import get_cache, Downloader
-        downloader = Downloader(get_cache())
+        downloader = Downloader()
 
     classes = match_url_classes(u_str, **kwargs)
 
@@ -367,7 +367,7 @@ class Url(object):
             netloc = s.netloc
             u = s
         except AttributeError:
-            u = parse_app_url(s)
+            u = parse_app_url(s, downloader=self.downloader)
             path = u.path
             netloc = u.netloc
 
@@ -394,7 +394,7 @@ class Url(object):
             netloc = s.netloc
             u = s
         except AttributeError:
-            u = parse_app_url(s)
+            u = parse_app_url(s, downloader=self.downloader)
             path = u.path
             netloc = u.netloc
 
@@ -421,7 +421,7 @@ class Url(object):
         if not self.scheme_extension:
             return self
 
-        return parse_app_url(str(self.clone(scheme_extension=None)))
+        return parse_app_url(str(self.clone(scheme_extension=None)), downloader=self.downloader)
 
     def abspath(self, s):
         raise NotImplementedError()

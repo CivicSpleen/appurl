@@ -81,8 +81,8 @@ class Downloader(object):
     def cache(self):
         if not self._cache:
             from appurl import get_cache
-            qn = self.__module__+'.'+self.__class__.__qualname__
-            self._cache = get_cache(qn)
+            #qn = self.__module__+'.'+self.__class__.__qualname__
+            self._cache = get_cache()
 
 
         return self._cache

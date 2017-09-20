@@ -50,9 +50,9 @@ class WebUrl(Url):
         ru = parse_app_url(self._resource.sys_path,
                            fragment=self.fragment,
                            fragment_query=self.fragment_query,
-                           scheme_extension=self.scheme_extension
+                           scheme_extension=self.scheme_extension,
+                           downloader = self.downloader
                            )
-
 
         return ru
 
