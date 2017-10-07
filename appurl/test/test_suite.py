@@ -1,8 +1,8 @@
 
 import unittest
-from test_basic import BasicTests
-from test_issues import TestIssues
-from test_parse_url import TestUrlParse
+from appurl.test.test_basic import BasicTests
+from appurl.test.test_issues import TestIssues
+from appurl.test.test_parse_url import TestUrlParse
 
 
 def suite():

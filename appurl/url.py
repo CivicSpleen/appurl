@@ -6,8 +6,10 @@
 from .util import reparse_url, unparse_url_dict, file_ext, parse_url_to_dict
 from os.path import basename, join, dirname
 from pkg_resources import iter_entry_points
-from .exc import  AppUrlError
-#from traitlets import HasTraits, Unicode, Any, Dict, observe, TraitError
+from .exc import AppUrlError
+
+
+# from traitlets import HasTraits, Unicode, Any, Dict, observe, TraitError
 
 
 def match_url_classes(u_str, **kwargs):
@@ -111,7 +113,7 @@ class Url(object):
 
             for k, v in parts.items():
                 try:
-                    #print(" {}: '{}' ".format(k,v))
+                    # print(" {}: '{}' ".format(k,v))
                     setattr(self, k, v)
                 except AttributeError:
                     print("Can't Set: ", k, v)
@@ -123,7 +125,6 @@ class Url(object):
                     setattr(self, k, {})
                 else:
                     setattr(self, k, kwargs.get(k))
-
 
         self.fragment_query = kwargs.get('fragment_query', self.fragment_query or {})
 
@@ -154,7 +155,6 @@ class Url(object):
 
         self._downloader = downloader
 
-
     @property
     def fragment(self):
         return self._fragment
@@ -177,7 +177,6 @@ class Url(object):
         u = self.clone()
         u.fragment = f
         return u
-
 
     @property
     def downloader(self):
@@ -230,7 +229,7 @@ class Url(object):
         return self.resource_file
 
     @target_file.setter
-    def target_file(self,v):
+    def target_file(self, v):
         self.fragment[0] = v
 
     def set_target_file(self, v):
@@ -247,7 +246,7 @@ class Url(object):
             return None
 
     @target_segment.setter
-    def target_segment(self,v):
+    def target_segment(self, v):
         self.fragment[1] = v
 
     def set_target_segment(self, v):
@@ -255,7 +254,6 @@ class Url(object):
         u = self.clone()
         u.fragment[1] = v
         return u
-
 
     @property
     def target_format(self):
@@ -277,8 +275,6 @@ class Url(object):
             target_format = None
 
         return target_format
-
-
 
     def list(self):
         """Return URLS for files contained in an container"""
@@ -407,12 +403,10 @@ class Url(object):
 
         return url
 
-
     def join_target(self, tf):
         """Return a new URL, possibly of a new class, with a new target_file"""
 
         raise NotImplementedError("Not implemented in '{}' ".format(type(self)))
-
 
     @property
     def inner(self):
@@ -486,8 +480,6 @@ class Url(object):
 
         return o
 
-
-
     def as_type(self, cls):
         """Return the URL transformed to a different class"""
 
@@ -500,7 +492,7 @@ class Url(object):
                "proto resource_url resource_file resource_format target_file target_format " \
                "encoding target_segment"
 
-        d = dict((k,v) for k, v in self.__dict__.items() if k in keys)
+        d = dict((k, v) for k, v in self.__dict__.items() if k in keys)
 
         return d
 
@@ -556,6 +548,15 @@ class Url(object):
                 raise AttributeError("Can't set attribute '{}' on '{}' ".format(k, c))
 
         return c
+
+    @property
+    def generator(self):
+        """Return the generator for this URL, if the rowgenerator package is installed"""
+
+        from rowgenerators import get_generator
+
+        return get_generator(self.get_resource.get_target())
+
 
     def __repr__(self):
         return "<{} {}>".format(self.__class__.__name__, str(self))

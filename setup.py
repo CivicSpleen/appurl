@@ -8,14 +8,21 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='appurl',
-    version='0.1.7',
+    version='0.1.8',
     url='https://github.com/CivicKnowledge/appurl',
     license='MIT',
     author='Eric Busboom',
     author_email='eric@busboom.org',
     description='Url manipulation for extended application urls',
-    packages=['appurl','appurl.archive','appurl.file','appurl.web'],
+    packages=['appurl','appurl.archive','appurl.file','appurl.web', 'appurl.test','appurl.test.test_data'],
+    package_data={
+        # If any package contains *.txt or *.rst files, include them:
+        '': ['*.csv'],
+    },
     zip_safe=True,
+    #test_suite='appurl.test.test_suite',
+    test_suite='nose.collector',
+    tests_require=['nose'],
     install_requires=[
         'fs >= 2',
         'boto',
