@@ -9,14 +9,14 @@ from os.path import basename
 from appurl.util import unparse_url_dict, file_ext
 
 class ExcelFileUrl(FileUrl):
-
+    """URL that references an Excl file, either .xls or .xlsx"""
 
 
     def __init__(self, url=None, downloader=None, **kwargs):
         super().__init__(url, downloader, **kwargs)
 
     @classmethod
-    def match(cls, url, **kwargs):
+    def _match(cls, url, **kwargs):
         return url.proto == 'file' and url.resource_format in ('xlsx', 'xls')
 
     @property

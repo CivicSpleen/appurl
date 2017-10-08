@@ -6,13 +6,14 @@
 from appurl.file import FileUrl
 
 class ProgramUrl(FileUrl):
+    """URL that references an executable file"""
 
     def __init__(self, url=None, downloader=None, **kwargs):
         super().__init__(url, downloader, **kwargs)
         kwargs['proto'] = 'program'
 
     @classmethod
-    def match(cls, url, **kwargs):
+    def _match(cls, url, **kwargs):
         return url.proto == 'program'
 
     def get_resource(self):

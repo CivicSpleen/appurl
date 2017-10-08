@@ -16,7 +16,7 @@ class WebUrl(Url):
         self._resource = None # return value from the downloader
 
     @classmethod
-    def match(cls, url, **kwargs):
+    def _match(cls, url, **kwargs):
         """Return True if this handler can handle the input URL"""
         return url.scheme.startswith('http')
 
@@ -24,9 +24,6 @@ class WebUrl(Url):
         """Return a list of this URL with the fragments from listing the resource"""
 
         return list(self.set_fragment(u.fragment) for u in self.get_resource().list())
-
-
-
 
     @property
     def auth_resource_url(self):
@@ -41,7 +38,6 @@ class WebUrl(Url):
 
     def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
-
 
         from appurl import parse_app_url
 

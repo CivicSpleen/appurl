@@ -8,3 +8,5 @@ from .program import ProgramUrl
 from .python import PythonUrl
 from .csv import CsvFileUrl
 from .excel import ExcelFileUrl
+
+__all__ = "FileUrl ProgramUrl PythonUrl CsvFileUrl ExcelFileUrl".split()

@@ -8,9 +8,10 @@ from os.path import basename
 from appurl.util import unparse_url_dict, file_ext
 
 class CsvFileUrl(FileUrl):
+    """URL that references a CSV file"""
 
     @classmethod
-    def match(cls, url, **kwargs):
+    def _match(cls, url, **kwargs):
         return url.proto == 'file' and url.target_format == 'csv'
 
 

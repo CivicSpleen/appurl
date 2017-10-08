@@ -120,4 +120,7 @@ Typical use is:
     assert exists(target_path.path)
 
 
-The call to ``url.get_resource()`` will download the resoruce file and store it in the cache ,returning a ``File:`` url pointing to the downloaded file. If the file is an archive, the call to ``resource.get_target()`` will extract the target file from the archive. If it is not an archive, it just returns the resource url. The final result is that ``target_path`` is a Url pointing to a file in the filesystem.
+The call to ``url.get_resource()`` will download the resoruce file and store it in the cache ,returning a
+``File:`` url pointing to the downloaded file. If the file is an archive, the call to ``resource.get_target()``
+will extract the target file from the archive. If it is not an archive, it just returns the resource url. The final
+result is that ``target_path`` is a Url pointing to a file in the filesystem.

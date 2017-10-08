@@ -9,7 +9,16 @@ from os.path import exists, isdir, dirname
 
 
 class FileUrl(Url):
+    """URL that references a general file"""
+
     def __init__(self, url=None, downloader=None,**kwargs):
+        """
+        This is the initter
+        :param url:
+        :param downloader:
+        :param kwargs:
+        :return:
+        """
         super().__init__(url, downloader=downloader, **kwargs)
 
     match_priority = 50
@@ -27,6 +36,16 @@ class FileUrl(Url):
         ensure_dir(self.path)
 
     def list(self):
+        """This function does something.
+
+        :param name: The name to use.
+        :type name: str.
+        :param state: Current state to be in.
+        :type state: bool.
+        :returns:  int -- the return code.
+        :raises: AttributeError, KeyError
+
+        """
 
         if self.isdir():
             from os import listdir
@@ -57,7 +76,33 @@ class FileUrl(Url):
 
     def join_target(self, tf):
         """For normal files, joining a target assumes the target is a child of the current targets
-        directory"""
+        directory
+
+
+    Args:
+       name (str):  The name to use.
+
+    Kwargs:
+       state (bool): Current state to be in.
+
+    Returns:
+       int.  The return code::
+
+          0 -- Success!
+          1 -- No good.
+          2 -- Try again.
+
+    Raises:
+       AttributeError, KeyError
+
+    A really great idea.  A way you might use me is
+
+    >>> print public_fn_with_googley_docstring(name='foo', state=None)
+    0
+
+    BTW, this always returns 0.  **NEVER** use with :class:`MyPublicClass`.
+
+    """
 
         try:
             tf = tf.path

@@ -23,7 +23,7 @@ def match_url_classes(u_str, **kwargs):
 
     u = Url(str(u_str), downloader=None, **kwargs)
 
-    classes = sorted([ep.load() for ep in iter_entry_points(group='appurl.urls') if u.match_entry_point(ep.name)],
+    classes = sorted([ep.load() for ep in iter_entry_points(group='appurl.urls') if u._match_entry_point(ep.name)],
                      key=lambda cls: cls.match_priority)
 
     return classes
@@ -31,11 +31,11 @@ def match_url_classes(u_str, **kwargs):
 
 def parse_app_url(u_str, downloader='default', **kwargs):
     """
-    Parse a URL string and return a constructed Url object, with the class based on the highest priority
+    Parse a URL string and return a Url object, with the class based on the highest priority
     entry point that matches the Url and which of the entry point classes pass the match() test.
 
     :param u_str: Url string
-    :param downloader: Downloader() to use for downloading objects.
+    :param downloader: Downloader object to use for downloading objects.
     :param kwargs: Args passed to the Url constructor.
     :return:
     """
@@ -58,21 +58,59 @@ def parse_app_url(u_str, downloader='default', **kwargs):
     u = Url(str(u_str), downloader=None, **kwargs)
 
     for cls in classes:
-        if cls.match(u):
+        if cls._match(u):
             return cls(str(u_str) if u_str else None, downloader=downloader, **kwargs)
 
 
 class Url(object):
     """Base class for URL Managers
 
-    url: The input URL
-    proto: The extension of the scheme (git+http://, etc), if there is one, otherwise the scheme.
+    After construction, a Url object has a set of properties and attributes for access
+    the parts of the URL, and method for manipulating it. The attributes and properties
+    include the typical properties of a parsed URL, plus properties that are derives from the
+    typical parts, and a few extra components that can be part of the fragment query.
+
+    The typical parts are:
+
+    - ``scheme``
+    - ``scheme_extension``
+    - ``netloc``
+    - ``hostname``
+    - ``path``
+    - ``params``
+    - ``query``
+    - ``fragment``
+    - ``username``
+    - ``password``
+    - ``port``
+
+    The ``fragment`` is special; it is an array of two elements, the first of which is the ``target_file`` and
+    and the second is the ``target_segment``. If there are other parts of the source URL, they must be
+    formates as queriy components, and will be parsed into the ``fragment_query``.
+
+
+    Special application components are:
+
+    - ``proto``. This is set to the ``scheme_extension`` if it exists, the scheme otherwise.
+    - ``resource_file``. The filename of the resource to download. It is usually the last part of the URL, but can be overidden in the fragment
+    - ``resource_format``. The format name of the resource, normally drawn from the ``resoruce_file`` extension, but can be overidden in the fragment
+    - ``target_file``. The filename of the file that will be produced by :py:meth`Url.get_target`, but may be overidden.
+    - ``target_format``. The format of the ``target_file``, but may be overidden.
+    - ``target_segment``. A sub-component of the ```target_file``, such as the worksheet in a spreadsheet.
+    - ``fragment_query``. Holds additional parts of the fragment.
+
+    When the fragment holds extra parts, these can be be formatted as a URL query. Recognized keys are:
+
+    - ``resource_file``
+    - ``resource_format``
+    - ``target_file``
+    - ``target_format``
+    - ``encoding``. Text encoding to be used when reading the target.
+    - ``headers``. For row-oriented data, the row numbers of the headers, as a comma-seperated list of integers.
+    - ``start``. For row-oriented data, the row number of the first row of data ( as opposed to headers. )
+    - ``end``. For row-oriented data, the row number of the last row of data.
 
     """
-
-    match_priority = 100
-
-    downloader = None
 
     # Basic URL components
     scheme = None
@@ -89,9 +127,7 @@ class Url(object):
     port = None
 
     # Application components
-    scheme = None
     _proto = None
-
     _resource_file = None
     _resource_format = None
     _target_file = None
@@ -102,6 +138,10 @@ class Url(object):
     headers = None  # line number of headers
     start = None  # start line for data
     end = None  # end line for data
+
+    match_priority = 100
+
+    downloader = None
 
     def __init__(self, url=None, downloader=None, **kwargs):
 
@@ -180,6 +220,7 @@ class Url(object):
 
     @property
     def downloader(self):
+        """Return the Downloader() for this URL"""
         return self._downloader
 
     @property
@@ -312,43 +353,6 @@ class Url(object):
 
         return file, segment
 
-    def match_entry_point(self, name):
-        """Return true if this URL matches the entrypoint pattern
-
-        Entrypoint patterns:
-
-            'scheme:' Match the URL scheme
-            'proto+' Matches the protocol / scheme_extension
-            '.ext' Match the resource extension
-            '#.ext' Match the target extension
-        """
-
-        if '&' in name:
-            return all(self.match_entry_point(n) for n in name.split('&'))
-
-        try:
-            name = name.name  # Maybe it's an entrypoint entry, not the name
-        except AttributeError:
-            pass
-
-        if name == '*':
-            return True
-        elif name.endswith(":"):
-            return name[:-1] == self.scheme
-        elif name.endswith('+'):
-            return name[:-1] == self.proto
-        elif name.startswith('.'):
-            return name[1:] == self.resource_format
-        elif name.startswith('#.'):
-            return name[2:] == self.target_format
-        else:
-            return False
-
-    @classmethod
-    def match(cls, url, **kwargs):
-        """Return True if this handler can handle the input URL"""
-        return True;  # raise NotImplementedError("Match is not implemented for class '{}' ".format(str(cls)))
-
     def join(self, s, scheme_extension=None):
         """ Join a component to the end of the path, using join()
         :param s:
@@ -417,27 +421,6 @@ class Url(object):
 
         return parse_app_url(str(self.clone(scheme_extension=None)), downloader=self.downloader)
 
-    def abspath(self, s):
-        raise NotImplementedError()
-
-        sp = parse_url_to_dict(s)
-
-        if sp['netloc']:
-            return s
-
-        url = reparse_url(self.url, path=join(dirname(self.parts.path), sp['path']), fragment=sp['fragment'])
-
-        assert url
-        return url
-
-    def prefix_path(self, base):
-        raise NotImplementedError()
-        """Prefix the path with a base, if the path is relative"""
-
-        url = reparse_url(self.url, path=join(base, self.parts.path))
-
-        assert url
-        return url
 
     def dirname(self):
         """Return the dirname of the path"""
@@ -457,28 +440,6 @@ class Url(object):
         c.headers = None
         return c
 
-    def update(self, **kwargs):
-        """Returns a new Url object, possibly with some of the properties replaced"""
-
-        o = Url(
-            self.rebuild_url(target_file=kwargs.get('target_file', self.target_file),
-                             target_segment=kwargs.get('target_segment', self.target_segment)),
-            scheme=kwargs.get('scheme', self.scheme),
-            proto=kwargs.get('proto', self.proto),
-            resource_url=kwargs.get('resource_url', self.resource_url),
-            resource_file=kwargs.get('resource_file', self.resource_file),
-            resource_format=kwargs.get('resource_format', self.resource_format),
-            target_file=kwargs.get('target_file', self.target_file),
-            target_format=kwargs.get('target_format', self.target_format),
-            encoding=kwargs.get('encoding', self.encoding),
-            target_segment=kwargs.get('target_segment', self.target_segment)
-        )
-
-        o._process_resource_url()
-        o._process_fragment()
-        o._process_target_file()
-
-        return o
 
     def as_type(self, cls):
         """Return the URL transformed to a different class"""
@@ -533,6 +494,12 @@ class Url(object):
         return type(self)(None, downloader=self._downloader, **d, )
 
     def clone(self, **kwargs):
+        """
+        Return a clone of this Url, popssibly with some arguments replaced.
+
+        :param kwargs: Keyword arguments are arguments to set in the copy, using :py:func:`setattr`
+        :return:
+        """
 
         d = self.dict.copy()
         c = type(self)(None, downloader=self._downloader, **d)
@@ -557,6 +524,42 @@ class Url(object):
 
         return get_generator(self.get_resource.get_target())
 
+    def _match_entry_point(self, name):
+        """Return true if this URL matches the entrypoint pattern
+
+        Entrypoint patterns:
+
+            'scheme:' Match the URL scheme
+            'proto+' Matches the protocol / scheme_extension
+            '.ext' Match the resource extension
+            '#.ext' Match the target extension
+        """
+
+        if '&' in name:
+            return all(self._match_entry_point(n) for n in name.split('&'))
+
+        try:
+            name = name.name  # Maybe it's an entrypoint entry, not the name
+        except AttributeError:
+            pass
+
+        if name == '*':
+            return True
+        elif name.endswith(":"):
+            return name[:-1] == self.scheme
+        elif name.endswith('+'):
+            return name[:-1] == self.proto
+        elif name.startswith('.'):
+            return name[1:] == self.resource_format
+        elif name.startswith('#.'):
+            return name[2:] == self.target_format
+        else:
+            return False
+
+    @classmethod
+    def _match(cls, url, **kwargs):
+        """Return True if this handler can handle the input URL"""
+        return True;  # raise NotImplementedError("Match is not implemented for class '{}' ".format(str(cls)))
 
     def __repr__(self):
         return "<{} {}>".format(self.__class__.__name__, str(self))

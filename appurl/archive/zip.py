@@ -21,6 +21,8 @@ class ZipUrlError(AppUrlError):
 
 class ZipUrl(FileUrl):
 
+    """Zip URLS represent a fix file, as a local resource. """
+
     match_priority = 40
 
     def __init__(self, url=None, downloader=None, **kwargs):
@@ -28,7 +30,7 @@ class ZipUrl(FileUrl):
         super().__init__(url, downloader=downloader, **kwargs)
 
     @classmethod
-    def match(cls, url, **kwargs):
+    def _match(cls, url, **kwargs):
 
        return url.resource_format == 'zip' or kwargs.get('force_archive')
 
@@ -50,8 +52,6 @@ class ZipUrl(FileUrl):
 
         # Want to return none, so get_files_from-zip can assume to use the first file in the archive.
         return None
-
-
 
 
     def join_target(self, tf):

@@ -19,7 +19,7 @@ class PythonUrl(FileUrl):
         kwargs['scheme'] = 'python'
 
     @classmethod
-    def match(cls, url, **kwargs):
+    def _match(cls, url, **kwargs):
         return url.proto == 'python'
 
     def get_resource(self):

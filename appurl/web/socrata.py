@@ -20,7 +20,7 @@ class SocrataUrl(WebUrl):
 
 
     @classmethod
-    def match(cls, url, **kwargs):
+    def _match(cls, url, **kwargs):
         return url.proto == 'socrata'
 
 
