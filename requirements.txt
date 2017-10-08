@@ -1,3 +1,4 @@
 fs >= 2
 boto
 requests
+filelock

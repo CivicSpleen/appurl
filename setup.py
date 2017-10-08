@@ -26,7 +26,8 @@ setup(
     install_requires=[
         'fs >= 2',
         'boto',
-        'requests'
+        'requests',
+        'filelock'
         ],
     entry_points = {
         'appurl.urls' : [

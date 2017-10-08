@@ -597,7 +597,7 @@ class Url(object):
 
     def __copy__(self):
         d = self.dict.copy()
-        return type(self)(None, downloader=self._downloader, **d, )
+        return type(self)(None, downloader=self._downloader, **d )
 
     def _decompose_fragment(self, frag):
         """Parse the fragment component"""
