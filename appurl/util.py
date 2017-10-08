@@ -172,7 +172,12 @@ def unparse_url_dict(d, **kwargs):
         else:
             seg = quote_plus(d.get('fragment'))
 
-        query = '&'+urlencode(d.get('fragment_query'),doseq=True) if d.get('fragment_query') else ''
+        if d.get('fragment_query'):
+            fqt = sorted(d.get('fragment_query').items())
+            query = '&' + urlencode(fqt,doseq=True)
+        else:
+            query = ''
+
 
         if seg or query:
             url += "#"+seg+unquote(query)
