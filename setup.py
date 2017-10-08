@@ -22,7 +22,7 @@ setup(
     zip_safe=True,
     #test_suite='appurl.test.test_suite',
     test_suite='nose.collector',
-    tests_require=['nose','rowgenerators'],
+    tests_require=['nose','rowgenerators','tabulate'],
     install_requires=[
         'fs >= 2',
         'boto',
