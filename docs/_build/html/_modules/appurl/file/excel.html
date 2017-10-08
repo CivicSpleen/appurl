@@ -62,7 +62,6 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">resource_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
         <span class="k">return</span> <span class="n">unparse_url_dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict</span><span class="p">,</span>
                                 <span class="n">scheme_extension</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                                 <span class="n">fragment</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -91,8 +90,6 @@
 
         <span class="k">return</span> <span class="p">(</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span> <span class="k">if</span> <span class="n">list_self</span> <span class="k">else</span> <span class="p">[]</span> <span class="p">)</span> <span class="o">+</span> <span class="n">_l</span><span class="p">()</span>
 
-
-
     <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">scheme_extension</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">scheme_extension</span><span class="p">)</span>
 
@@ -110,7 +107,7 @@
         <span class="n">u</span><span class="o">.</span><span class="n">fragment</span> <span class="o">=</span> <span class="p">[</span><span class="n">tf</span><span class="p">,</span><span class="kc">None</span><span class="p">]</span> <span class="c1"># In case its a tuple, don&#39;t edit in place</span>
         <span class="k">return</span> <span class="n">u</span>
 
-    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span> <span class="c1"># Like super method, but don&#39;t clear the fragment; it&#39;s needed in the row generator</span></div>
 
 

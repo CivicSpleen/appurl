@@ -96,5 +96,5 @@ jspm_packages
 
 _metapack
 
-sphinx/_build
+docs/_build
 

@@ -40,11 +40,12 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="file-urls">
-<h1>File Urls<a class="headerlink" href="#file-urls" title="Permalink to this headline">¶</a></h1>
-<p>File URLs represent resources that are acessible on the local file system, so the
-<code class="xref py py-meth docutils literal"><span class="pre">FileUrl.get_resource()</span></code> just returns <code class="docutils literal"><span class="pre">self</span></code></p>
-<span class="target" id="module-appurl.file"></span><dl class="class">
+  <div class="section" id="module-appurl.file">
+<span id="file-urls"></span><h1>File Urls<a class="headerlink" href="#module-appurl.file" title="Permalink to this headline">¶</a></h1>
+<p>File URLs represent resources that are acessible on the local file system.</p>
+<p>Because these URLs are assumed to be local, the resource already exists on
+the local file system, and the <a class="reference internal" href="#appurl.file.FileUrl.get_resource" title="appurl.file.FileUrl.get_resource"><code class="xref py py-meth docutils literal"><span class="pre">FileUrl.get_resource()</span></code></a> just returns <code class="docutils literal"><span class="pre">self</span></code></p>
+<dl class="class">
 <dt id="appurl.file.FileUrl">
 <em class="property">class </em><code class="descclassname">appurl.file.</code><code class="descname">FileUrl</code><span class="sig-paren">(</span><em>url=None</em>, <em>downloader=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl" title="Permalink to this definition">¶</a></dt>
 <dd><p>URL that references a general file</p>
@@ -61,10 +62,8 @@
 
 <dl class="method">
 <dt id="appurl.file.FileUrl.get_target">
-<code class="descname">get_target</code><span class="sig-paren">(</span><em>mode=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl.get_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl.get_target" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the contents of the target, and save it to the cache, returning a file-like object
-:param downloader:
-:param mode:</p>
+<code class="descname">get_target</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl.get_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl.get_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the contents of the target, and save it to the cache, returning a file-like object</p>
 </dd></dl>
 
 <dl class="method">
