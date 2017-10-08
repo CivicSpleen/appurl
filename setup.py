@@ -22,12 +22,12 @@ setup(
     zip_safe=True,
     #test_suite='appurl.test.test_suite',
     test_suite='nose.collector',
-    tests_require=['nose'],
+    tests_require=['nose','rowgenerators'],
     install_requires=[
         'fs >= 2',
         'boto',
         'requests',
-        'filelock'
+        'filelock',
         ],
     entry_points = {
         'appurl.urls' : [
