@@ -40,9 +40,11 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-appurl.file">
-<span id="file-urls"></span><h1>File Urls<a class="headerlink" href="#module-appurl.file" title="Permalink to this headline">¶</a></h1>
-<dl class="class">
+  <div class="section" id="file-urls">
+<h1>File Urls<a class="headerlink" href="#file-urls" title="Permalink to this headline">¶</a></h1>
+<p>File URLs represent resources that are acessible on the local file system, so the
+<code class="xref py py-meth docutils literal"><span class="pre">FileUrl.get_resource()</span></code> just returns <code class="docutils literal"><span class="pre">self</span></code></p>
+<span class="target" id="module-appurl.file"></span><dl class="class">
 <dt id="appurl.file.FileUrl">
 <em class="property">class </em><code class="descclassname">appurl.file.</code><code class="descname">FileUrl</code><span class="sig-paren">(</span><em>url=None</em>, <em>downloader=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl" title="Permalink to this definition">¶</a></dt>
 <dd><p>URL that references a general file</p>
@@ -68,30 +70,8 @@
 <dl class="method">
 <dt id="appurl.file.FileUrl.join_target">
 <code class="descname">join_target</code><span class="sig-paren">(</span><em>tf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl.join_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl.join_target" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="docutils">
-<dt>For normal files, joining a target assumes the target is a child of the current targets</dt>
-<dd>directory</dd>
-<dt>Args:</dt>
-<dd>name (str):  The name to use.</dd>
-<dt>Kwargs:</dt>
-<dd>state (bool): Current state to be in.</dd>
-<dt>Returns:</dt>
-<dd><p class="first">int.  The return code:</p>
-<div class="last highlight-default"><div class="highlight"><pre><span></span>0 -- Success!
-1 -- No good.
-2 -- Try again.
-</pre></div>
-</div>
-</dd>
-<dt>Raises:</dt>
-<dd>AttributeError, KeyError</dd>
-</dl>
-<p>A really great idea.  A way you might use me is</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">public_fn_with_googley_docstring</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="n">state</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-<span class="go">0</span>
-</pre></div>
-</div>
-<p>BTW, this always returns 0.  <strong>NEVER</strong> use with <code class="xref py py-class docutils literal"><span class="pre">MyPublicClass</span></code>.</p>
+<dd><p>For normal files, joining a target assumes the target is a child of the current targets
+directory</p>
 </dd></dl>
 
 <dl class="method">

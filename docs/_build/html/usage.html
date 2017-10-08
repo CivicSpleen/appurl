@@ -40,19 +40,19 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-appurl">
-<span id="basic-usage"></span><h1>Basic Usage<a class="headerlink" href="#module-appurl" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="basic-usage">
+<h1>Basic Usage<a class="headerlink" href="#basic-usage" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="creating-an-appurl">
 <h2>Creating an AppUrl<a class="headerlink" href="#creating-an-appurl" title="Permalink to this headline">¶</a></h2>
 <p>There are two ways to create an AppUrl: parse a string, or instantiate a class.
 If you are starting from a string,  and in particular, don’t know what the Url class
 should be, use <code class="xref py py-meth docutils literal"><span class="pre">parse_app_url()</span></code>. If you do know what kind of Url you want
-to generate, use the <a class="reference internal" href="#appurl.Url" title="appurl.Url"><code class="xref py py-class docutils literal"><span class="pre">Url</span></code></a> subclass directly.</p>
+to generate, use the <code class="xref py py-class docutils literal"><span class="pre">Url</span></code> subclass directly.</p>
 <p>After creating a URL, the basic useage involve either manipulating it, or fetching it.
-THere are two fetching methods, <a class="reference internal" href="#appurl.Url.get_resource" title="appurl.Url.get_resource"><code class="xref py py-meth docutils literal"><span class="pre">Url.get_resource()</span></code></a>, to download files from
-the web, and <a class="reference internal" href="#appurl.Url.get_target" title="appurl.Url.get_target"><code class="xref py py-meth docutils literal"><span class="pre">Url.get_target()</span></code></a> to extract a file from an archive or other
+THere are two fetching methods, <code class="xref py py-meth docutils literal"><span class="pre">Url.get_resource()</span></code>, to download files from
+the web, and <code class="xref py py-meth docutils literal"><span class="pre">Url.get_target()</span></code> to extract a file from an archive or other
 container. When the operation is unnecessary, such as getting the resource for
-a resource URL that has already been downloaded, the <a class="reference internal" href="#appurl.Url.get_resource" title="appurl.Url.get_resource"><code class="xref py py-meth docutils literal"><span class="pre">Url.get_resource()</span></code></a>
+a resource URL that has already been downloaded, the <code class="xref py py-meth docutils literal"><span class="pre">Url.get_resource()</span></code>
 returns <code class="docutils literal"><span class="pre">self</span></code>.</p>
 <p>These AppUrls have these components in addition to standard URLS:</p>
 <ul class="simple">
@@ -89,19 +89,12 @@ to be access or downloaded. In the eample above, the resource url is
 <h2>Using AppUrls<a class="headerlink" href="#using-appurls" title="Permalink to this headline">¶</a></h2>
 <p>Typical use is:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">appurl</span> <span class="kn">import</span>  <span class="n">parse_app_url</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">exists</span>
 
-<span class="n">downloader</span> <span class="o">=</span> <span class="n">Downloader</span><span class="p">(</span><span class="n">get_cache</span><span class="p">())</span>
-
-<span class="n">url_str</span> <span class="o">=</span> <span class="s2">&quot;http://example.com/archive.zip#file.csv&quot;</span>
-
-<span class="n">url</span> <span class="o">=</span> <span class="n">parse_app_url</span><span class="p">(</span><span class="n">url_str</span><span class="p">,</span> <span class="n">downloader</span> <span class="o">=</span> <span class="n">downloader</span><span class="p">)</span>
+<span class="n">url</span> <span class="o">=</span> <span class="n">parse_app_url</span><span class="p">(</span><span class="s2">&quot;http://example.com/archive.zip#file.csv&quot;</span><span class="p">)</span>
 
 <span class="n">resource_url</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">get_resource</span><span class="p">()</span>
 
 <span class="n">target_path</span> <span class="o">=</span> <span class="n">resource_url</span><span class="o">.</span><span class="n">get_target</span><span class="p">()</span>
-
-<span class="k">assert</span> <span class="n">exists</span><span class="p">(</span><span class="n">target_path</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The call to <code class="docutils literal"><span class="pre">url.get_resource()</span></code> will download the resource file and store it in the cache ,returning a

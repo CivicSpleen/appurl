@@ -57,7 +57,7 @@ used to refer to tabular data stored on data repositories. For instance:</p>
 <p>The module defines an <code class="docutils literal"><span class="pre">entry_point</span></code>, so other modules can extend the types of
 URLs can that can produced by <code class="xref py py-meth docutils literal"><span class="pre">parse_app_url()</span></code>. For instance,
 the <a class="reference external" href="https://github.com/CivicKnowledge/pandas-reporter">pandas-reporter</a>
-module extends <a class="reference internal" href="usage.html#module-appurl" title="appurl"><code class="xref py py-mod docutils literal"><span class="pre">appurl</span></code></a> to access Census tables from Census
+module extends <code class="xref py py-mod docutils literal"><span class="pre">appurl</span></code> to access Census tables from Census
 Reporter, using URLs such as <code class="docutils literal"><span class="pre">censusreporter:B17001/140/05000US06073</span></code></p>
 <p>Typical use – for downloading an archive and extracting a file from it – is:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">appurl</span> <span class="kn">import</span>  <span class="n">parse_app_url</span>
