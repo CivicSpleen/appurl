@@ -25,7 +25,7 @@ class PythonUrl(FileUrl):
     def get_resource(self):
         return self
 
-    def get_target(self, mode=None):
+    def get_target(self):
         return self
 
     @property

@@ -476,9 +476,8 @@ class Url(object):
                                    "You may need to install a python mpdule for this type of url")
                                   .format(self.__class__.__name__, str(self)))
 
-    def get_target(self, mode=None):
+    def get_target(self):
         """Get the contents of the target, and save it to the cache, returning a file-like object
-        :param mode:
         """
         raise NotImplementedError(("get_target not implemented in {} for '{}'"
                                    "You may need to install a python mpdule for this type of url"

@@ -21,7 +21,6 @@ class ExcelFileUrl(FileUrl):
 
     @property
     def resource_url(self):
-        from os.path import join
         return unparse_url_dict(self.dict,
                                 scheme_extension=False,
                                 fragment=False)
@@ -50,8 +49,6 @@ class ExcelFileUrl(FileUrl):
 
         return ( [self] if list_self else [] ) + _l()
 
-
-
     def join(self, s, scheme_extension=None):
         return super().join(s, scheme_extension)
 
@@ -69,7 +66,7 @@ class ExcelFileUrl(FileUrl):
         u.fragment = [tf,None] # In case its a tuple, don't edit in place
         return u
 
-    def get_target(self, mode=None):
+    def get_target(self):
         return self # Like super method, but don't clear the fragment; it's needed in the row generator
 
 

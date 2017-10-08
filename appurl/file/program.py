@@ -19,8 +19,8 @@ class ProgramUrl(FileUrl):
     def get_resource(self):
         return super().get_resource()
 
-    def get_target(self, mode=None):
-        return super().get_target(mode)
+    def get_target(self):
+        return super().get_target()
 
 
 

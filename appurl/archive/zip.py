@@ -74,10 +74,9 @@ class ZipUrl(FileUrl):
     def zip_dir(self):
         return self.path+'_d'
 
-    def get_target(self, mode=None):
+    def get_target(self):
         """Get the contents of the target, and save it to the cache, returning a file-like object
         :param downloader:
-        :param mode:
         """
 
         assert self.zip_dir
@@ -116,7 +115,7 @@ class ZipUrl(FileUrl):
         """List the files in the referenced Zip file"""
 
         if self.target_file:
-            return list( self.set_target_segment(tl.target_segment) for tl in self.get_target().list() )
+            return list(self.set_target_segment(tl.target_segment) for tl in self.get_target().list())
         else:
             return list(self.set_target_file(rf) for rf in ZipUrl.real_files_in_zf(ZipFile(self.path)))
 

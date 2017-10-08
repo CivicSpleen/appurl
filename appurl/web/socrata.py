@@ -43,9 +43,8 @@ class SocrataUrl(WebUrl):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
         raise NotImplementedError()
 
-    def get_target(self, mode=None):
+    def get_target(self):
         """Get the contents of the target, and save it to the cache, returning a file-like object
         :param downloader:
-        :param mode:
         """
         raise NotImplementedError()

@@ -481,28 +481,6 @@
         <span class="n">c</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">c</span></div>
 
-<div class="viewcode-block" id="Url.update"><a class="viewcode-back" href="../../usage.html#appurl.Url.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns a new Url object, possibly with some of the properties replaced&quot;&quot;&quot;</span>
-
-        <span class="n">o</span> <span class="o">=</span> <span class="n">Url</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rebuild_url</span><span class="p">(</span><span class="n">target_file</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_file&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_file</span><span class="p">),</span>
-                             <span class="n">target_segment</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_segment&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_segment</span><span class="p">)),</span>
-            <span class="n">scheme</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scheme&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scheme</span><span class="p">),</span>
-            <span class="n">proto</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;proto&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proto</span><span class="p">),</span>
-            <span class="n">resource_url</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource_url&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_url</span><span class="p">),</span>
-            <span class="n">resource_file</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource_file&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_file</span><span class="p">),</span>
-            <span class="n">resource_format</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resource_format&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resource_format</span><span class="p">),</span>
-            <span class="n">target_file</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_file&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_file</span><span class="p">),</span>
-            <span class="n">target_format</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_format&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_format</span><span class="p">),</span>
-            <span class="n">encoding</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">),</span>
-            <span class="n">target_segment</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target_segment&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_segment</span><span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="n">o</span><span class="o">.</span><span class="n">_process_resource_url</span><span class="p">()</span>
-        <span class="n">o</span><span class="o">.</span><span class="n">_process_fragment</span><span class="p">()</span>
-        <span class="n">o</span><span class="o">.</span><span class="n">_process_target_file</span><span class="p">()</span>
-
-        <span class="k">return</span> <span class="n">o</span></div>
 
 <div class="viewcode-block" id="Url.as_type"><a class="viewcode-back" href="../../usage.html#appurl.Url.as_type">[docs]</a>    <span class="k">def</span> <span class="nf">as_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the URL transformed to a different class&quot;&quot;&quot;</span>

@@ -60,10 +60,9 @@ class FileUrl(Url):
 
         return self
 
-    def get_target(self, mode=None):
+    def get_target(self):
         """Get the contents of the target, and save it to the cache, returning a file-like object
-        :param downloader:
-        :param mode:
+
         """
 
         return self.clear_fragment()
@@ -76,33 +75,7 @@ class FileUrl(Url):
 
     def join_target(self, tf):
         """For normal files, joining a target assumes the target is a child of the current targets
-        directory
-
-
-    Args:
-       name (str):  The name to use.
-
-    Kwargs:
-       state (bool): Current state to be in.
-
-    Returns:
-       int.  The return code::
-
-          0 -- Success!
-          1 -- No good.
-          2 -- Try again.
-
-    Raises:
-       AttributeError, KeyError
-
-    A really great idea.  A way you might use me is
-
-    >>> print public_fn_with_googley_docstring(name='foo', state=None)
-    0
-
-    BTW, this always returns 0.  **NEVER** use with :class:`MyPublicClass`.
-
-    """
+        directory"""
 
         try:
             tf = tf.path
