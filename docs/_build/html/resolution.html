@@ -41,8 +41,8 @@
             
   <div class="section" id="resolving-and-extending-urls">
 <h1>Resolving and Extending Urls<a class="headerlink" href="#resolving-and-extending-urls" title="Permalink to this headline">¶</a></h1>
-<p>The primary interface is <code class="docutils literal"><span class="pre">appurls.parse_url</span></code>, which will and construct
-a <code class="docutils literal"><span class="pre">appurl.url.Url</span></code> for a string. The function will select a Url class
+<p>The primary interface is <code class="xref py py-func docutils literal"><span class="pre">appurls.parse_url`()</span></code>, which will find and construct
+a <code class="xref py py-class docutils literal"><span class="pre">appurl.url.Url</span></code> for a string. The function will select a Url class
 using two selection criteria. The first is the <code class="docutils literal"><span class="pre">appurl.urls</span></code> entry
 point. Here is the entrypoint configuration for the <code class="docutils literal"><span class="pre">appurl</span></code> package:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span>  <span class="n">entry_points</span> <span class="o">=</span> <span class="p">{</span>

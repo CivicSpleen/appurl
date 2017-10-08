@@ -48,29 +48,27 @@ the local file system, and the <a class="reference internal" href="#appurl.file.
 <dl class="class">
 <dt id="appurl.file.FileUrl">
 <em class="property">class </em><code class="descclassname">appurl.file.</code><code class="descname">FileUrl</code><span class="sig-paren">(</span><em>url=None</em>, <em>downloader=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl" title="Permalink to this definition">¶</a></dt>
-<dd><p>URL that references a general file</p>
-<p>This is the initter
-:param url:
-:param downloader:
-:param kwargs:
-:return:</p>
+<dd><p>FileUrl is the baseclass for URLs that reference a general file, assumed to be
+local to the file system.</p>
+<p>This documentation only describes the differences in implementation from the super class.
+See the documentation for the superclass, <a class="reference internal" href="usage.html#appurl.Url" title="appurl.Url"><code class="xref py py-class docutils literal"><span class="pre">appurl.Url</span></code></a> for the default implementations.</p>
 <dl class="method">
 <dt id="appurl.file.FileUrl.get_resource">
 <code class="descname">get_resource</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl.get_resource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl.get_resource" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the contents of resource and save it to the cache, returning a file-like object</p>
+<dd><p>Return a url to the resource, which for FileUrls is always <code class="docutils literal"><span class="pre">self</span></code>.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="appurl.file.FileUrl.get_target">
 <code class="descname">get_target</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl.get_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl.get_target" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the contents of the target, and save it to the cache, returning a file-like object</p>
+<dd><p>Return the url of the target file in the local file system.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="appurl.file.FileUrl.join_target">
 <code class="descname">join_target</code><span class="sig-paren">(</span><em>tf</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl.join_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl.join_target" title="Permalink to this definition">¶</a></dt>
-<dd><p>For normal files, joining a target assumes the target is a child of the current targets
-directory</p>
+<dd><p>For normal files, joining a target assumes the target is a child of the current target’s
+directory, so this just passes through the <code class="xref py py-meth docutils literal"><span class="pre">Url.join_dir()</span></code></p>
 </dd></dl>
 
 <dl class="method">
@@ -100,7 +98,7 @@ directory</p>
 <dl class="method">
 <dt id="appurl.file.FileUrl.read">
 <code class="descname">read</code><span class="sig-paren">(</span><em>mode='rb'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/file.html#FileUrl.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.FileUrl.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return contents of file</p>
+<dd><p>Return contents of the target file</p>
 </dd></dl>
 
 </dd></dl>
@@ -121,11 +119,6 @@ directory</p>
 <dt id="appurl.file.CsvFileUrl">
 <em class="property">class </em><code class="descclassname">appurl.file.</code><code class="descname">CsvFileUrl</code><span class="sig-paren">(</span><em>url=None</em>, <em>downloader=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/file/csv.html#CsvFileUrl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.file.CsvFileUrl" title="Permalink to this definition">¶</a></dt>
 <dd><p>URL that references a CSV file</p>
-<p>This is the initter
-:param url:
-:param downloader:
-:param kwargs:
-:return:</p>
 </dd></dl>
 
 <dl class="class">

@@ -1,11 +1,10 @@
 Resolving and Extending Urls
 ============================
 
-The primary interface is ``appurls.parse_url``, which will and construct
-a ``appurl.url.Url`` for a string. The function will select a Url class
+The primary interface is :py:func:`appurls.parse_url``, which will find and construct
+a :py:class:`appurl.url.Url` for a string. The function will select a Url class
 using two selection criteria. The first is the ``appurl.urls`` entry
 point. Here is the entrypoint configuration for the ``appurl`` package:
-
 
 
 .. code-block:: python

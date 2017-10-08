@@ -9,15 +9,16 @@ from os.path import exists, isdir, dirname
 
 
 class FileUrl(Url):
-    """URL that references a general file"""
+    """FileUrl is the baseclass for URLs that reference a general file, assumed to be
+    local to the file system.
+
+    This documentation only describes the differences in implementation from the super class.
+    See the documentation for the superclass, :py:class:`appurl.Url` for the default implementations.
+
+    """
 
     def __init__(self, url=None, downloader=None,**kwargs):
         """
-        This is the initter
-        :param url:
-        :param downloader:
-        :param kwargs:
-        :return:
         """
         super().__init__(url, downloader=downloader, **kwargs)
 
@@ -50,32 +51,31 @@ class FileUrl(Url):
         if self.isdir():
             from os import listdir
 
-            return [ u for e in listdir(self.path) for u in self.join(e).list() ]
+            return [u for e in listdir(self.path) for u in self.join(e).list()]
 
         else:
             return [self]
 
     def get_resource(self):
-        """Get the contents of resource and save it to the cache, returning a file-like object"""
+        """Return a url to the resource, which for FileUrls is always ``self``."""
 
         return self
 
     def get_target(self):
-        """Get the contents of the target, and save it to the cache, returning a file-like object
-
+        """Return the url of the target file in the local file system.
         """
 
         return self.clear_fragment()
 
 
     def read(self, mode='rb'):
-        """Return contents of file"""
-        with open(self.path, mode=mode) as f:
+        """Return contents of the target file"""
+        with open(self.get_target().path, mode=mode) as f:
             return f.read()
 
     def join_target(self, tf):
-        """For normal files, joining a target assumes the target is a child of the current targets
-        directory"""
+        """For normal files, joining a target assumes the target is a child of the current target's
+        directory, so this just passes through the :py:meth:`Url.join_dir`"""
 
         try:
             tf = tf.path

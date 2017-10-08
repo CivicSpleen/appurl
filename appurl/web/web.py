@@ -7,6 +7,12 @@ from appurl.url import Url
 from appurl.util import parse_url_to_dict
 
 class WebUrl(Url):
+    """Base class for web urls.
+
+    This documentation only describes the differences in implementation from the super class.
+    See the documentation for the superclass, :py:class:`appurl.Url` for the default implementations.
+
+    """
 
     match_priority = 20
 
@@ -27,7 +33,7 @@ class WebUrl(Url):
 
     @property
     def auth_resource_url(self):
-        """Return An S3: version of the url, with a resource_url format that will trigger boto auth"""
+        """Return An ``S3:`` version of the url, with a resource_url format that will trigger boto auth"""
 
         # This is just assuming that the url was created as a resource from the S2Url, and
         # has the form 'https://s3.amazonaws.com/{bucket}/{key}'
@@ -52,14 +58,14 @@ class WebUrl(Url):
 
         return ru
 
-    def join_dir(self, s, scheme_extension=None):
+    def join_dir(self, s):
 
 
         if self.resource_format in ('zip','xlsx'):
             u = Url(s)
             return self.clone(fragment=u.path)
         else:
-            return super().join_dir(s, scheme_extension)
+            return super().join_dir(s)
 
     def join_target(self, tf):
 

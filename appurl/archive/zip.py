@@ -21,7 +21,7 @@ class ZipUrlError(AppUrlError):
 
 class ZipUrl(FileUrl):
 
-    """Zip URLS represent a fix file, as a local resource. """
+    """Zip URLS represent a zip file, as a local resource. """
 
     match_priority = 40
 
@@ -29,17 +29,16 @@ class ZipUrl(FileUrl):
         kwargs['resource_format'] = 'zip'
         super().__init__(url, downloader=downloader, **kwargs)
 
-    @classmethod
-    def _match(cls, url, **kwargs):
 
-       return url.resource_format == 'zip' or kwargs.get('force_archive')
-
-    def _process(self):
-        super()._process()
 
     @property
     def target_file(self):
+        """
+        Returns the target file, which is usually stored in the first slot in the ``fragment``,
+        but may have been overridded with a ``fragment_query``.
 
+        :return:
+        """
         if self._target_file:
             return self._target_file
 
@@ -55,6 +54,12 @@ class ZipUrl(FileUrl):
 
 
     def join_target(self, tf):
+        """
+        Joins the target ``tf`` by setting the value of the first slot of the fragment.
+
+        :param tf:
+        :return: a clone of this url with a new fragment.
+        """
         u = self.clone()
 
         try:
@@ -66,8 +71,6 @@ class ZipUrl(FileUrl):
         return u
 
     def get_resource(self):
-        """Get the contents of resource and save it to the cache, returning a file-like object"""
-
         return self
 
     @property
@@ -75,8 +78,10 @@ class ZipUrl(FileUrl):
         return self.path+'_d'
 
     def get_target(self):
-        """Get the contents of the target, and save it to the cache, returning a file-like object
-        :param downloader:
+        """
+        Extract the target file from the archive, store it in the cache, and return a file Url to the
+        cached file.
+
         """
 
         assert self.zip_dir
@@ -182,5 +187,11 @@ class ZipUrl(FileUrl):
             # e.external_attr==32 is true for some single-file archives.
             if bool(e.external_attr >> 31 & 1 or e.external_attr == 0 or e.external_attr == 32):
                 yield e.filename
+
+    @classmethod
+    def _match(cls, url, **kwargs):
+
+        return url.resource_format == 'zip' or kwargs.get('force_archive')
+
 
 

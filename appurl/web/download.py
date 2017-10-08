@@ -56,6 +56,10 @@ class Resource(object):
 
 
 class Downloader(object):
+    """Downloader objects handle downloading resrouces from the web, including authorization,
+    and storing the downloaded object in a cache. Since they are the primary interface to the file cache,
+    all Urls object have a link to a Downloader """
+
     def __init__(self, cache=None, account_accessor=None, logger=None,
                  working_dir='', callback=None):
         """
@@ -63,7 +67,7 @@ class Downloader(object):
 
         :param self:
         :param cache: A PyFs filesystem object for caching files
-        :param account_accessor: An objevct for acessing account credentials. Not used.
+        :param account_accessor: An objevct for acessing account credentials. Not currently used.
         :param logger: Logging object to write debug logs to
         :param working_dir:
         :param callback: Call back to call with progress reports during downloads.

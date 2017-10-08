@@ -63,7 +63,7 @@ def parse_app_url(u_str, downloader='default', **kwargs):
 
 
 class Url(object):
-    """Base class for URL Managers
+    """Base class for Application URLs .
 
     After construction, a Url object has a set of properties and attributes for access
     the parts of the URL, and method for manipulating it. The attributes and properties
@@ -87,7 +87,6 @@ class Url(object):
     The ``fragment`` is special; it is an array of two elements, the first of which is the ``target_file`` and
     and the second is the ``target_segment``. If there are other parts of the source URL, they must be
     formates as queriy components, and will be parsed into the ``fragment_query``.
-
 
     Special application components are:
 
@@ -144,7 +143,29 @@ class Url(object):
     downloader = None
 
     def __init__(self, url=None, downloader=None, **kwargs):
+        """  Initialize a new Application Url
+        :param url: URL string
+        :param downloader: :py:class:`appurl.web.download.Downloader` object.
+        :param kwargs: Additional arguments override URL properties.
+        :return: An Application Url object
 
+
+        Keyword arguments will override properties set by parsing the URL string. Valid keywords
+        that will set object properties are listed below. Other keyswords are accepted and ignored
+
+        - scheme
+        - scheme_extension
+        - netloc
+        - hostname
+        - path
+        - params
+        - fragment
+        - fragment_query
+        - username
+        - password
+        - port
+
+        """
         assert 'is_archive' not in kwargs
 
         if url is not None:
@@ -161,14 +182,14 @@ class Url(object):
         else:
             for k in "scheme scheme_extension netloc hostname path params query fragment fragment_query username password port".split():
 
-                if k == 'fragment_query' and kwargs.get(k) is None:  # Probably trying to se it to Null
+                if k == 'fragment_query' and kwargs.get(k) is None:  # Probably trying to set it to Null
                     setattr(self, k, {})
                 else:
                     setattr(self, k, kwargs.get(k))
 
         self.fragment_query = kwargs.get('fragment_query', self.fragment_query or {})
 
-        self._fragment = self.decompose_fragment(kwargs.get('fragment', self.fragment))
+        self._fragment = self._decompose_fragment(kwargs.get('fragment', self.fragment))
 
         if not self._fragment:
             self._fragment = [None, None]
@@ -195,6 +216,208 @@ class Url(object):
 
         self._downloader = downloader
 
+    def get_resource(self):
+        """Get the contents of resource and save it to the cache, returning a file-like object"""
+        raise NotImplementedError(("get_resource not implemented in {} for '{}'. "
+                                   "You may need to install a python mpdule for this type of url")
+                                  .format(self.__class__.__name__, str(self)))
+
+    def get_target(self):
+        """Get the contents of the target, and save it to the cache, returning a file-like object
+        """
+        raise NotImplementedError(("get_target not implemented in {} for '{}'"
+                                   "You may need to install a python mpdule for this type of url"
+                                   )
+                                  .format(self.__class__.__name__, str(self)))
+
+
+
+
+    @property
+    def downloader(self):
+        """Return the Downloader() for this URL"""
+        return self._downloader
+
+    def list(self):
+        """Return URLS for files contained in an container. This implementation just returns
+        ``[self]``, but sub classes may, for instance, list all of the sub-components of a directory,
+        or all of the worksheets in an Excel file. """
+        return [self]
+
+    @property
+    def is_archive(self):
+        """Return true if this URL is for an archive. Currently only ZIP is recognized"""
+        return self.resource_format in self.archive_formats
+
+    # property
+    def archive_file(self):
+        """Return the name of the archive file, if there is one."""
+        return self.target_file if self.is_archive and self.resource_file != self.target_file else None
+
+
+    def join(self, s):
+        """ Join a component to the end of the path, using :py:func:`os.path.join`. The argument
+        ``s`` may be a :py:`appurl.Url` or a string. If ``s`` includes a ``netloc`` property,
+         it is assumed to be an absolute url, and it is returned after parsing as a Url. Otherwise,
+         the path component of ``s`` is extracted and joined to the path component of this url.
+
+        :param s: A Url object, or a string.
+        :return: A copy of this url.
+        """
+
+        from copy import copy
+
+        try:
+            path = s.path
+            netloc = s.netloc
+            u = s
+        except AttributeError:
+            u = parse_app_url(s, downloader=self.downloader)
+            path = u.path
+            netloc = u.netloc
+
+        # If there is a netloc, it's an absolute URL
+        if netloc:
+            return u
+
+        url = copy(self)
+        url.path = join(self.path, path)
+
+        return url
+
+    def join_dir(self, s):
+        """ Join a component to the parent directory of the path, using join(dirname())
+
+        :param s:
+        :return: a copy of this url.
+        """
+
+        from copy import copy
+
+        try:
+            path = s.path
+            netloc = s.netloc
+            u = s
+        except AttributeError:
+            u = parse_app_url(s, downloader=self.downloader)
+            path = u.path
+            netloc = u.netloc
+
+        # If there is a netloc, it's an absolute URL
+        if netloc:
+            return u
+
+        url = copy(self)
+        url.path = join(dirname(self.path), path)
+
+        return url
+
+    def join_target(self, tf):
+        """Return a new URL, possibly of a new class, with a new target_file"""
+
+        raise NotImplementedError("Not implemented in '{}' ".format(type(self)))
+
+    @property
+    def inner(self):
+        """Return the URL without the scheme extension and fragment. Re-parses the URL, so it should return
+        the correct class for the inner URL. """
+        if not self.scheme_extension:
+            return self
+
+        return parse_app_url(str(self.clone(scheme_extension=None)), downloader=self.downloader)
+
+
+    def dirname(self):
+        """Return the dirname of the path"""
+        u = self.clone()
+        u.path = dirname(self.path)
+        return u
+
+    def clear_fragment(self):
+        """
+        Return a copy of the URL with no fragment components
+
+        :return: A cloned URl object, with the fragment and fragment queries cleared.
+        """
+
+        c = self.clone()
+        c.fragment = [None, None]
+        c.fragment_query = {}
+        c.encoding = None
+        c.start = None
+        c.end = None
+        c.headers = None
+        return c
+
+
+    def as_type(self, cls):
+        """
+        Return the URL transformed to a different class. Copies the downloader and
+        build the new url using :py:meth:`Url.dict`
+
+        :param cls: Class of Url to construct
+        :return: A new Url object
+        """
+
+        return cls(downloader=self.downloader, **self.dict)
+
+    @property
+    def dict(self):
+        """
+        Returns a dictionary of the object components.
+
+        :return: a dict.
+        """
+        self._update_parts()
+        keys = "url scheme scheme_extension netloc hostname path params query _fragment fragment_query username password port " \
+               "proto resource_url resource_file resource_format target_file target_format " \
+               "encoding target_segment"
+
+        d = dict((k, v) for k, v in self.__dict__.items() if k in keys)
+
+        return d
+
+
+    def clone(self, **kwargs):
+        """
+        Return a clone of this Url, popssibly with some arguments replaced.
+
+        :param kwargs: Keyword arguments are arguments to set in the copy, using :py:func:`setattr`
+        :return: A cloned Url object.
+        """
+
+        d = self.dict.copy()
+        c = type(self)(None, downloader=self._downloader, **d)
+
+        c.fragment = self.fragment
+
+        c._update_parts()
+
+        for k, v in kwargs.items():
+            try:
+                setattr(c, k, v)
+            except AttributeError:
+                raise AttributeError("Can't set attribute '{}' on '{}' ".format(k, c))
+
+        return c
+
+    @property
+    def generator(self):
+        """
+        Return the generator for this URL, if the rowgenerator package is installed.
+
+        :return: A row generator object.
+        """
+
+        from rowgenerators import get_generator
+
+        return get_generator(self.get_resource.get_target())
+
+
+    #
+    # Property accessors
+    #
+
     @property
     def fragment(self):
         return self._fragment
@@ -217,11 +440,6 @@ class Url(object):
         u = self.clone()
         u.fragment = f
         return u
-
-    @property
-    def downloader(self):
-        """Return the Downloader() for this URL"""
-        return self._downloader
 
     @property
     def proto(self):
@@ -253,10 +471,6 @@ class Url(object):
             return None
         else:
             return file_ext(self.resource_file)
-
-    @property
-    def target_url(self):
-        raise NotImplementedError()
 
     @property
     def target_file(self):
@@ -317,211 +531,10 @@ class Url(object):
 
         return target_format
 
-    def list(self):
-        """Return URLS for files contained in an container"""
-        return [self]
 
-    @property
-    def is_archive(self):
-        """Return true if this URL is for an archive. Currently only ZIP is recognized"""
-        return self.resource_format in self.archive_formats
-
-    # property
-    def archive_file(self):
-        """Return the name of the archive file, if there is one."""
-        return self.target_file if self.is_archive and self.resource_file != self.target_file else None
-
-    def decompose_fragment(self, frag):
-        from urllib.parse import unquote_plus
-
-        if isinstance(frag, (list, tuple)):
-            return frag
-
-        if not frag:
-            return None, None
-
-        frag_parts = unquote_plus(frag).split(';')
-
-        if not frag_parts:
-            file, segment = None, None
-        elif len(frag_parts) == 1:
-            file = frag_parts[0]
-            segment = None
-        elif len(frag_parts) >= 2:
-            file = frag_parts[0]
-            segment = frag_parts[1]
-
-        return file, segment
-
-    def join(self, s, scheme_extension=None):
-        """ Join a component to the end of the path, using join()
-        :param s:
-        :param scheme_extension:
-        :return:
-        """
-
-        from copy import copy
-
-        try:
-            path = s.path
-            netloc = s.netloc
-            u = s
-        except AttributeError:
-            u = parse_app_url(s, downloader=self.downloader)
-            path = u.path
-            netloc = u.netloc
-
-        # If there is a netloc, it's an absolute URL
-        if netloc:
-            return u
-
-        url = copy(self)
-        url.path = join(self.path, path)
-
-        return url
-
-    def join_dir(self, s, scheme_extension=None):
-        """ Join a component to the parent directory of the path, using join(dirname())
-        :param s:
-        :param scheme_extension:
-        :return:
-        """
-
-        from copy import copy
-
-        try:
-            path = s.path
-            netloc = s.netloc
-            u = s
-        except AttributeError:
-            u = parse_app_url(s, downloader=self.downloader)
-            path = u.path
-            netloc = u.netloc
-
-        # If there is a netloc, it's an absolute URL
-        if netloc:
-            return u
-
-        url = copy(self)
-        url.path = join(dirname(self.path), path)
-
-        return url
-
-    def join_target(self, tf):
-        """Return a new URL, possibly of a new class, with a new target_file"""
-
-        raise NotImplementedError("Not implemented in '{}' ".format(type(self)))
-
-    @property
-    def inner(self):
-        """Return the URL whouth the scheme extension and fragment. Re-parses the URL, so it should return
-        the correct class for the inner URL. """
-        if not self.scheme_extension:
-            return self
-
-        return parse_app_url(str(self.clone(scheme_extension=None)), downloader=self.downloader)
-
-
-    def dirname(self):
-        """Return the dirname of the path"""
-        u = self.clone()
-        u.path = dirname(self.path)
-        return u
-
-    def clear_fragment(self):
-        """Return a copy of the URL with no fragment components"""
-
-        c = self.clone()
-        c.fragment = [None, None]
-        c.fragment_query = {}
-        c.encoding = None
-        c.start = None
-        c.end = None
-        c.headers = None
-        return c
-
-
-    def as_type(self, cls):
-        """Return the URL transformed to a different class"""
-
-        return cls(downloader=self.downloader, **self.dict)
-
-    @property
-    def dict(self):
-        self._update_parts()
-        keys = "url scheme scheme_extension netloc hostname path params query _fragment fragment_query username password port " \
-               "proto resource_url resource_file resource_format target_file target_format " \
-               "encoding target_segment"
-
-        d = dict((k, v) for k, v in self.__dict__.items() if k in keys)
-
-        return d
-
-    def _update_parts(self):
-        """Update the fragement_query. Set the attribute for the query value to False to delete it from
-        the fragment query"""
-
-        for k in "encoding headers start end".split():
-            if getattr(self, k):
-                self.fragment_query[k] = getattr(self, k)
-            elif getattr(self, k) == False and k in self.fragment_query:
-                del self.fragment_query[k]
-
-                # if self.fragment:
-                #    self.rebuild_fragment()
-
-    def get_resource(self):
-        """Get the contents of resource and save it to the cache, returning a file-like object"""
-        raise NotImplementedError(("get_resource not implemented in {} for '{}'. "
-                                   "You may need to install a python mpdule for this type of url")
-                                  .format(self.__class__.__name__, str(self)))
-
-    def get_target(self):
-        """Get the contents of the target, and save it to the cache, returning a file-like object
-        """
-        raise NotImplementedError(("get_target not implemented in {} for '{}'"
-                                   "You may need to install a python mpdule for this type of url"
-                                   )
-                                  .format(self.__class__.__name__, str(self)))
-
-    def __deepcopy__(self, memo):
-        d = self.dict.copy()
-        return type(self)(None, downloader=self._downloader, **d)
-
-    def __copy__(self):
-        d = self.dict.copy()
-        return type(self)(None, downloader=self._downloader, **d, )
-
-    def clone(self, **kwargs):
-        """
-        Return a clone of this Url, popssibly with some arguments replaced.
-
-        :param kwargs: Keyword arguments are arguments to set in the copy, using :py:func:`setattr`
-        :return:
-        """
-
-        d = self.dict.copy()
-        c = type(self)(None, downloader=self._downloader, **d)
-
-        c.fragment = self.fragment
-
-        c._update_parts()
-
-        for k, v in kwargs.items():
-            try:
-                setattr(c, k, v)
-            except AttributeError:
-                raise AttributeError("Can't set attribute '{}' on '{}' ".format(k, c))
-
-        return c
-
-    @property
-    def generator(self):
-        """Return the generator for this URL, if the rowgenerator package is installed"""
-
-        from rowgenerators import get_generator
-
-        return get_generator(self.get_resource.get_target())
+    #
+    # Matching methods
+    #
 
     def _match_entry_point(self, name):
         """Return true if this URL matches the entrypoint pattern
@@ -559,6 +572,55 @@ class Url(object):
     def _match(cls, url, **kwargs):
         """Return True if this handler can handle the input URL"""
         return True;  # raise NotImplementedError("Match is not implemented for class '{}' ".format(str(cls)))
+
+
+    #
+    # Other support methods
+    #
+
+    def _update_parts(self):
+        """Update the fragement_query. Set the attribute for the query value to False to delete it from
+        the fragment query"""
+
+        for k in "encoding headers start end".split():
+            if getattr(self, k):
+                self.fragment_query[k] = getattr(self, k)
+            elif getattr(self, k) == False and k in self.fragment_query:
+                del self.fragment_query[k]
+
+                # if self.fragment:
+                #    self.rebuild_fragment()
+
+    def __deepcopy__(self, memo):
+        d = self.dict.copy()
+        return type(self)(None, downloader=self._downloader, **d)
+
+    def __copy__(self):
+        d = self.dict.copy()
+        return type(self)(None, downloader=self._downloader, **d, )
+
+    def _decompose_fragment(self, frag):
+        """Parse the fragment component"""
+        from urllib.parse import unquote_plus
+
+        if isinstance(frag, (list, tuple)):
+            return frag
+
+        if not frag:
+            return None, None
+
+        frag_parts = unquote_plus(frag).split(';')
+
+        if not frag_parts:
+            file, segment = None, None
+        elif len(frag_parts) == 1:
+            file = frag_parts[0]
+            segment = None
+        elif len(frag_parts) >= 2:
+            file = frag_parts[0]
+            segment = frag_parts[1]
+
+        return file, segment
 
     def __repr__(self):
         return "<{} {}>".format(self.__class__.__name__, str(self))

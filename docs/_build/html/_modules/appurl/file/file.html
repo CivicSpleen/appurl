@@ -50,15 +50,16 @@
 
 
 <div class="viewcode-block" id="FileUrl"><a class="viewcode-back" href="../../../file_urls.html#appurl.file.FileUrl">[docs]</a><span class="k">class</span> <span class="nc">FileUrl</span><span class="p">(</span><span class="n">Url</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;URL that references a general file&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;FileUrl is the baseclass for URLs that reference a general file, assumed to be</span>
+<span class="sd">    local to the file system.</span>
+
+<span class="sd">    This documentation only describes the differences in implementation from the super class.</span>
+<span class="sd">    See the documentation for the superclass, :py:class:`appurl.Url` for the default implementations.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">downloader</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        This is the initter</span>
-<span class="sd">        :param url:</span>
-<span class="sd">        :param downloader:</span>
-<span class="sd">        :param kwargs:</span>
-<span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">downloader</span><span class="o">=</span><span class="n">downloader</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -91,32 +92,31 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isdir</span><span class="p">():</span>
             <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">listdir</span>
 
-            <span class="k">return</span> <span class="p">[</span> <span class="n">u</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="p">()</span> <span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">u</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">list</span><span class="p">()]</span>
 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="FileUrl.get_resource"><a class="viewcode-back" href="../../../file_urls.html#appurl.file.FileUrl.get_resource">[docs]</a>    <span class="k">def</span> <span class="nf">get_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the contents of resource and save it to the cache, returning a file-like object&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return a url to the resource, which for FileUrls is always ``self``.&quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="FileUrl.get_target"><a class="viewcode-back" href="../../../file_urls.html#appurl.file.FileUrl.get_target">[docs]</a>    <span class="k">def</span> <span class="nf">get_target</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get the contents of the target, and save it to the cache, returning a file-like object</span>
-
+        <span class="sd">&quot;&quot;&quot;Return the url of the target file in the local file system.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">clear_fragment</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="FileUrl.read"><a class="viewcode-back" href="../../../file_urls.html#appurl.file.FileUrl.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;rb&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Return contents of file&quot;&quot;&quot;</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return contents of the target file&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_target</span><span class="p">()</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="FileUrl.join_target"><a class="viewcode-back" href="../../../file_urls.html#appurl.file.FileUrl.join_target">[docs]</a>    <span class="k">def</span> <span class="nf">join_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tf</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;For normal files, joining a target assumes the target is a child of the current targets</span>
-<span class="sd">        directory&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;For normal files, joining a target assumes the target is a child of the current target&#39;s</span>
+<span class="sd">        directory, so this just passes through the :py:meth:`Url.join_dir`&quot;&quot;&quot;</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">tf</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">path</span>

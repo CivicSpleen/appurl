@@ -190,7 +190,7 @@ def join_url_path(url, *paths):
 
     parts = parse_url_to_dict(url)
 
-    return reparse_url(url,path=os.path.join(parts['path'], *paths))
+    return reparse_url(url, path=os.path.join(parts['path']))
 
 def file_ext(v):
     """Split of the extension of a filename, without throwing an exception of there is no extension. Does not

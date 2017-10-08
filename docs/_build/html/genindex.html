@@ -51,11 +51,16 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#J"><strong>J</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
  
 </div>
 <h2 id="A">A</h2>
@@ -65,14 +70,20 @@
 </li>
       <li><a href="file_urls.html#module-appurl.file">appurl.file (module)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="web_urls.html#module-appurl.web">appurl.web (module)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage.html#appurl.Url.archive_file">archive_file() (appurl.Url method)</a>
 </li>
       <li><a href="usage.html#appurl.Url.as_type">as_type() (appurl.Url method)</a>
 </li>
+      <li><a href="web_urls.html#appurl.web.S3Url.auth_resource_url">auth_resource_url (appurl.web.S3Url attribute)</a>
+
+      <ul>
+        <li><a href="web_urls.html#appurl.web.WebUrl.auth_resource_url">(appurl.web.WebUrl attribute)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -93,11 +104,15 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="usage.html#appurl.Url.dict">dict (appurl.Url attribute)</a>
+</li>
       <li><a href="usage.html#appurl.Url.dirname">dirname() (appurl.Url method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage.html#appurl.Url.downloader">downloader (appurl.Url attribute)</a>
+</li>
+      <li><a href="web_urls.html#appurl.web.Downloader">Downloader (class in appurl.web)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -123,18 +138,28 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage.html#appurl.Url.generator">generator (appurl.Url attribute)</a>
 </li>
+      <li><a href="archive_urls.html#appurl.archive.ZipUrl.get_file_from_zip">get_file_from_zip() (appurl.archive.ZipUrl static method)</a>
+</li>
       <li><a href="file_urls.html#appurl.file.FileUrl.get_resource">get_resource() (appurl.file.FileUrl method)</a>
 
       <ul>
         <li><a href="usage.html#appurl.Url.get_resource">(appurl.Url method)</a>
 </li>
+        <li><a href="web_urls.html#appurl.web.SocrataUrl.get_resource">(appurl.web.SocrataUrl method)</a>
+</li>
+        <li><a href="web_urls.html#appurl.web.WebUrl.get_resource">(appurl.web.WebUrl method)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="file_urls.html#appurl.file.FileUrl.get_target">get_target() (appurl.file.FileUrl method)</a>
+      <li><a href="archive_urls.html#appurl.archive.ZipUrl.get_target">get_target() (appurl.archive.ZipUrl method)</a>
 
       <ul>
         <li><a href="usage.html#appurl.Url.get_target">(appurl.Url method)</a>
+</li>
+        <li><a href="file_urls.html#appurl.file.FileUrl.get_target">(appurl.file.FileUrl method)</a>
+</li>
+        <li><a href="web_urls.html#appurl.web.SocrataUrl.get_target">(appurl.web.SocrataUrl method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -161,24 +186,46 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="file_urls.html#appurl.file.FileUrl.join_target">join_target() (appurl.file.FileUrl method)</a>
+      <li><a href="archive_urls.html#appurl.archive.ZipUrl.join_target">join_target() (appurl.archive.ZipUrl method)</a>
 
       <ul>
         <li><a href="usage.html#appurl.Url.join_target">(appurl.Url method)</a>
 </li>
+        <li><a href="file_urls.html#appurl.file.FileUrl.join_target">(appurl.file.FileUrl method)</a>
+</li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="web_urls.html#appurl.web.S3Url.key">key (appurl.web.S3Url attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="file_urls.html#appurl.file.FileUrl.list">list() (appurl.file.FileUrl method)</a>
+      <li><a href="archive_urls.html#appurl.archive.ZipUrl.list">list() (appurl.archive.ZipUrl method)</a>
 
       <ul>
         <li><a href="usage.html#appurl.Url.list">(appurl.Url method)</a>
 </li>
+        <li><a href="file_urls.html#appurl.file.FileUrl.list">(appurl.file.FileUrl method)</a>
+</li>
+        <li><a href="web_urls.html#appurl.web.WebUrl.list">(appurl.web.WebUrl method)</a>
+</li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="web_urls.html#appurl.web.S3Url.object">object (appurl.web.S3Url attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -202,11 +249,17 @@
       <li><a href="file_urls.html#appurl.file.FileUrl.read">read() (appurl.file.FileUrl method)</a>
 </li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="archive_urls.html#appurl.archive.ZipUrl.real_files_in_zf">real_files_in_zf() (appurl.archive.ZipUrl static method)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="web_urls.html#appurl.web.S3Url">S3Url (class in appurl.web)</a>
+</li>
       <li><a href="usage.html#appurl.Url.set_fragment">set_fragment() (appurl.Url method)</a>
 </li>
   </ul></td>
@@ -215,6 +268,16 @@
 </li>
       <li><a href="usage.html#appurl.Url.set_target_segment">set_target_segment() (appurl.Url method)</a>
 </li>
+      <li><a href="web_urls.html#appurl.web.SocrataUrl">SocrataUrl (class in appurl.web)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="archive_urls.html#appurl.archive.ZipUrl.target_file">target_file (appurl.archive.ZipUrl attribute)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -222,6 +285,22 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="usage.html#appurl.Url">Url (class in appurl)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="web_urls.html#appurl.web.WebUrl">WebUrl (class in appurl.web)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="archive_urls.html#appurl.archive.ZipUrl">ZipUrl (class in appurl.archive)</a>
 </li>
   </ul></td>
 </tr></table>

@@ -7,7 +7,7 @@ from os.path import basename, join
 from appurl.web import WebUrl
 
 class SocrataUrl(WebUrl):
-
+    """Url to represent a dataset stored in a Socrata data repository. """
 
     def __init__(self, url=None,downloader=None, **kwargs):
 

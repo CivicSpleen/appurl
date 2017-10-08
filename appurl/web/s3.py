@@ -50,7 +50,7 @@ class S3Url(WebUrl):
         else:
             return file_ext(self.resource_file)
 
-    def join_dir(self, s, scheme_extension=None):
+    def join_dir(self, s):
 
         try:
             path = s.path

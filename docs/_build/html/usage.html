@@ -133,7 +133,7 @@ entry point that matches the Url and which of the entry point classes pass the m
 <dl class="class">
 <dt id="appurl.Url">
 <em class="property">class </em><code class="descclassname">appurl.</code><code class="descname">Url</code><span class="sig-paren">(</span><em>url=None</em>, <em>downloader=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/url.html#Url"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.Url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for URL Managers</p>
+<dd><p>Base class for Application URLs .</p>
 <p>After construction, a Url object has a set of properties and attributes for access
 the parts of the URL, and method for manipulating it. The attributes and properties
 include the typical properties of a parsed URL, plus properties that are derives from the
@@ -176,6 +176,26 @@ formates as queriy components, and will be parsed into the <code class="docutils
 <li><code class="docutils literal"><span class="pre">start</span></code>. For row-oriented data, the row number of the first row of data ( as opposed to headers. )</li>
 <li><code class="docutils literal"><span class="pre">end</span></code>. For row-oriented data, the row number of the last row of data.</li>
 </ul>
+<p>Initialize a new Application Url
+:param url: URL string
+:param downloader: <code class="xref py py-class docutils literal"><span class="pre">appurl.web.download.Downloader</span></code> object.
+:param kwargs: Additional arguments override URL properties.
+:return: An Application Url object</p>
+<p>Keyword arguments will override properties set by parsing the URL string. Valid keywords
+that will set object properties are listed below. Other keyswords are accepted and ignored</p>
+<ul class="simple">
+<li>scheme</li>
+<li>scheme_extension</li>
+<li>netloc</li>
+<li>hostname</li>
+<li>path</li>
+<li>params</li>
+<li>fragment</li>
+<li>fragment_query</li>
+<li>username</li>
+<li>password</li>
+<li>port</li>
+</ul>
 <dl class="method">
 <dt id="appurl.Url.archive_file">
 <code class="descname">archive_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/url.html#Url.archive_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.Url.archive_file" title="Permalink to this definition">¶</a></dt>
@@ -185,13 +205,32 @@ formates as queriy components, and will be parsed into the <code class="docutils
 <dl class="method">
 <dt id="appurl.Url.as_type">
 <code class="descname">as_type</code><span class="sig-paren">(</span><em>cls</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/url.html#Url.as_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.Url.as_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the URL transformed to a different class</p>
+<dd><p>Return the URL transformed to a different class. Copies the downloader and
+build the new url using <code class="xref py py-meth docutils literal"><span class="pre">Url.dict()</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cls</strong> – Class of Url to construct</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A new Url object</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="appurl.Url.clear_fragment">
 <code class="descname">clear_fragment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/url.html#Url.clear_fragment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.Url.clear_fragment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a copy of the URL with no fragment components</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A cloned URl object, with the fragment and fragment queries cleared.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -204,7 +243,21 @@ formates as queriy components, and will be parsed into the <code class="docutils
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> – Keyword arguments are arguments to set in the copy, using <code class="xref py py-func docutils literal"><span class="pre">setattr()</span></code></td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A cloned Url object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="appurl.Url.dict">
+<code class="descname">dict</code><a class="headerlink" href="#appurl.Url.dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of the object components.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a dict.</td>
 </tr>
 </tbody>
 </table>
@@ -225,7 +278,15 @@ formates as queriy components, and will be parsed into the <code class="docutils
 <dl class="attribute">
 <dt id="appurl.Url.generator">
 <code class="descname">generator</code><a class="headerlink" href="#appurl.Url.generator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the generator for this URL, if the rowgenerator package is installed</p>
+<dd><p>Return the generator for this URL, if the rowgenerator package is installed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A row generator object.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -243,7 +304,7 @@ formates as queriy components, and will be parsed into the <code class="docutils
 <dl class="attribute">
 <dt id="appurl.Url.inner">
 <code class="descname">inner</code><a class="headerlink" href="#appurl.Url.inner" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the URL whouth the scheme extension and fragment. Re-parses the URL, so it should return
+<dd><p>Return the URL without the scheme extension and fragment. Re-parses the URL, so it should return
 the correct class for the inner URL.</p>
 </dd></dl>
 
@@ -255,20 +316,38 @@ the correct class for the inner URL.</p>
 
 <dl class="method">
 <dt id="appurl.Url.join">
-<code class="descname">join</code><span class="sig-paren">(</span><em>s</em>, <em>scheme_extension=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/url.html#Url.join"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.Url.join" title="Permalink to this definition">¶</a></dt>
-<dd><p>Join a component to the end of the path, using join()
-:param s:
-:param scheme_extension:
-:return:</p>
+<code class="descname">join</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/url.html#Url.join"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.Url.join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Join a component to the end of the path, using <code class="xref py py-func docutils literal"><span class="pre">os.path.join()</span></code>. The argument
+<code class="docutils literal"><span class="pre">s</span></code> may be a <a href="#id1"><span class="problematic" id="id2">:py:`appurl.Url`</span></a> or a string. If <code class="docutils literal"><span class="pre">s</span></code> includes a <code class="docutils literal"><span class="pre">netloc</span></code> property,</p>
+<blockquote>
+<div>it is assumed to be an absolute url, and it is returned after parsing as a Url. Otherwise,
+the path component of <code class="docutils literal"><span class="pre">s</span></code> is extracted and joined to the path component of this url.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> – A Url object, or a string.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A copy of this url.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="appurl.Url.join_dir">
-<code class="descname">join_dir</code><span class="sig-paren">(</span><em>s</em>, <em>scheme_extension=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/url.html#Url.join_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.Url.join_dir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Join a component to the parent directory of the path, using join(dirname())
-:param s:
-:param scheme_extension:
-:return:</p>
+<code class="descname">join_dir</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/url.html#Url.join_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.Url.join_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Join a component to the parent directory of the path, using join(dirname())</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>s</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a copy of this url.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -280,7 +359,9 @@ the correct class for the inner URL.</p>
 <dl class="method">
 <dt id="appurl.Url.list">
 <code class="descname">list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/appurl/url.html#Url.list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#appurl.Url.list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return URLS for files contained in an container</p>
+<dd><p>Return URLS for files contained in an container. This implementation just returns
+<code class="docutils literal"><span class="pre">[self]</span></code>, but sub classes may, for instance, list all of the sub-components of a directory,
+or all of the worksheets in an Excel file.</p>
 </dd></dl>
 
 <dl class="method">

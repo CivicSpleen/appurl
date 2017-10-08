@@ -26,5 +26,5 @@ Install
 Documentation
 =============
 
-See the documentation in the `/docs directory of this repo <http://civicknowledge.org/appurl/>`_.
+See the documentation at http://appurl.readthedocs.io/
 

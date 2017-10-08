@@ -38,6 +38,23 @@ Typical use -- for downloading an archive and extracting a file from it -- is:
 
     assert(exists(target_path)) # The path to file.csv
 
+Install
+=======
+
+Use pip:
+
+.. code-block:: bash
+
+    $ pip install appurl
+
+
+Or, from github:
+
+.. code-block:: bash
+
+    $ pip install git+https://github.com/CivicKnowledge/appurl.git
+
+
 Contents
 ========
 

@@ -49,11 +49,11 @@ class ExcelFileUrl(FileUrl):
 
         return ( [self] if list_self else [] ) + _l()
 
-    def join(self, s, scheme_extension=None):
-        return super().join(s, scheme_extension)
+    def join(self, s):
+        return super().join(s)
 
-    def join_dir(self, s, scheme_extension=None):
-        return super().join_dir(s, scheme_extension)
+    def join_dir(self, s):
+        return super().join_dir(s)
 
     def join_target(self, tf):
 
