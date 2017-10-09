@@ -1,6 +1,9 @@
 Application Urls
 ****************
 
+.. image:: https://travis-ci.org/CivicKnowledge/appurl.svg?branch=master
+    :target: https://travis-ci.org/CivicKnowledge/appurl
+
 Application Urls provide structure and operations on URLS where the file the
 URL refers to can't, in general, simply be downloaded. For instance, you may
 want to refer to a CSV file inside a ZIP archive, or a worksheet in an Excel
