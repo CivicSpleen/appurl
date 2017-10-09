@@ -98,12 +98,13 @@ class BasicTests(unittest.TestCase):
 
                 t = r.get_target()
 
-
                 self.assertEqual(e['target_class'], t.__class__.__name__, e['name'])
                 self.assertEqual(e['target_format'], t.target_format, e['name'])
                 self.assertTrue(exists(t.path))
 
     def test_url_classes(self):
+
+        from appurl import match_url_classes
 
         with open(data_path('url_classes.csv')) as f:
             for e in DictReader(f):

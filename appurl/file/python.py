@@ -13,6 +13,8 @@ class PythonUrl(FileUrl):
     URL to reference python code
     """
 
+    match_priority = FileUrl.match_priority - 1
+
     def __init__(self, url=None, downloader=None, **kwargs):
 
         super().__init__(url, downloader, **kwargs)

@@ -22,7 +22,7 @@ class FileUrl(Url):
         """
         super().__init__(url, downloader=downloader, **kwargs)
 
-    match_priority = 50
+    match_priority = 90
 
     def exists(self):
         return exists(self.path)

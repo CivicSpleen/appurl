@@ -28,6 +28,7 @@ setup(
         'boto',
         'requests',
         'filelock',
+        'tabulate'
         ],
     entry_points = {
         'appurl.urls' : [
@@ -49,6 +50,9 @@ setup(
             "file: = appurl.file.file:FileUrl",
             "program+ = appurl.file.program:ProgramUrl",
             "python: = appurl.file.python:PythonUrl",
+        ],
+        'console_scripts': [
+            'appurl=appurl.cli:appurl'
         ]
     }
 )

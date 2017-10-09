@@ -3,3 +3,4 @@ boto
 requests
 filelock
 rowgenerators
+tabulate

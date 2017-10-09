@@ -10,6 +10,8 @@ from appurl.util import unparse_url_dict, file_ext
 class CsvFileUrl(FileUrl):
     """URL that references a CSV file"""
 
+    match_priority = FileUrl.match_priority - 5
+
     @classmethod
     def _match(cls, url, **kwargs):
         return url.proto == 'file' and url.target_format == 'csv'

@@ -23,7 +23,7 @@ class ZipUrl(FileUrl):
 
     """Zip URLS represent a zip file, as a local resource. """
 
-    match_priority = 40
+    match_priority = FileUrl.match_priority - 10
 
     def __init__(self, url=None, downloader=None, **kwargs):
         kwargs['resource_format'] = 'zip'

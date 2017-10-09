@@ -28,3 +28,41 @@ Documentation
 
 See the documentation at http://appurl.readthedocs.io/
 
+Development Notes
+=================
+
+Development Testing with Docker
++++++++++++++++++++++++++++++++
+
+Testing during development for other versions of Python is a bit of a pain, since you have
+to install the alternate version, and Tox will run all of the tests, not just the one you want.
+
+One way to deal with this is to install Docker locally, then run the docker test container
+on the source directory. This is done automatically from the Makefile in appurl/tests
+
+
+.. code-block:: bash
+
+    $ cd appurl/test
+    $ make build # to create the container image
+    $ make shell # to run bash the container
+
+You now have a docker container wher the /code directory is the appurl source dir.
+
+Now, run tox to build the tox virtual environments, then enter the specific version you want to
+run tests for and activate the virtual environment.
+
+.. code-block:: bash
+
+    # tox
+    # cd .tox/py34
+    # source bin/activate # Activate the python 3.4 virtual env
+    # cd ../../
+    # python setup.py test # Cause test deps to get installed
+    #
+    # python -munittest appurl.test.test_basic.BasicTests.test_url_classes  # Run one test
+
+
+
+
+

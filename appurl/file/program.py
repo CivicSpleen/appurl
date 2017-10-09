@@ -8,6 +8,8 @@ from appurl.file import FileUrl
 class ProgramUrl(FileUrl):
     """URL that references an executable file"""
 
+    match_priority = FileUrl.match_priority - 1
+
     def __init__(self, url=None, downloader=None, **kwargs):
         super().__init__(url, downloader, **kwargs)
         kwargs['proto'] = 'program'

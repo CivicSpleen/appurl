@@ -11,6 +11,7 @@ from appurl.util import unparse_url_dict, file_ext
 class ExcelFileUrl(FileUrl):
     """URL that references an Excl file, either .xls or .xlsx"""
 
+    match_priority = FileUrl.match_priority-5
 
     def __init__(self, url=None, downloader=None, **kwargs):
         super().__init__(url, downloader, **kwargs)
