@@ -34,6 +34,13 @@ See the documentation at http://appurl.readthedocs.io/
 Development Notes
 =================
 
+Running tests
++++++++++++++
+
+Run ``python setup.py tests`` to run normal development tests. You can also run ``tox``, which will
+try to run the tests with python 3.4, 3.5 and 3.6, ignoring non-existent interpreters.
+
+
 Development Testing with Docker
 +++++++++++++++++++++++++++++++
 
