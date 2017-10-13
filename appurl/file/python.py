@@ -32,14 +32,13 @@ class PythonUrl(FileUrl):
 
     @property
     def object(self):
+        """Return the python thing, a class or a function, that will be invoked """
 
-        components = self.path.replace('/','.').split('.') + [self.target_file]
+        from appurl.util import import_name_or_class
 
-        mod = __import__(components[0])
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
+        path = self.path.replace('/','.')+'.'+self.target_file
 
-        return mod
+        return import_name_or_class(path)
 
     def __call__(self, *args, **kwargs):
 

@@ -78,8 +78,6 @@ class TestIssues(unittest.TestCase):
         self.assertTrue(t.exists())
 
 
-
-
     def test_xlsx_fragment(self):
 
         url = parse_app_url('http://example.com/renter_cost_excel07.xlsx#2')
@@ -112,6 +110,17 @@ class TestIssues(unittest.TestCase):
         u = parse_app_url(('s3://library.metatab.org'))
 
         self.assertIsInstance(u, S3Url)
+
+
+    def test_downloaded_resource_type(self):
+
+        u = parse_app_url('http://public.source.civicknowledge.com/example.com/sources/test_data.zip')
+
+        ru = u.get_resource()
+
+        self.assertIsInstance(ru, ZipUrl)
+
+
 
 
 

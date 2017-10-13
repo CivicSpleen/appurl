@@ -93,11 +93,6 @@ class ZipUrl(FileUrl):
         target_path = join(self.zip_dir, self.target_file)
         ensure_dir(dirname(target_path))
 
-        #if self.encoding:
-        #    pass
-        #    flo = io.TextIOWrapper(flo, encoding=self.encoding if self.encoding else 'utf8')
-
-
         with io.open(target_path, 'wb') as f, zf.open(self.target_file) as flo:
             copy_file_or_flo(flo, f)
 
@@ -122,7 +117,8 @@ class ZipUrl(FileUrl):
         if self.target_file:
             return list(self.set_target_segment(tl.target_segment) for tl in self.get_target().list())
         else:
-            return list(self.set_target_file(rf) for rf in ZipUrl.real_files_in_zf(ZipFile(self.path)))
+            real_files = ZipUrl.real_files_in_zf(ZipFile(self.path))
+            return list(self.set_target_file(rf) for rf in real_files)
 
 
     @staticmethod
@@ -145,7 +141,9 @@ class ZipUrl(FileUrl):
             # so I certainly don't know why it does not.
             nl = list(zf.namelist())
 
+
         # the target_file may be a string, or a regular expression
+
         if tf:
             names = list([e for e in nl if re.search(tf, e)
                           and not (e.startswith('__') or e.startswith('.'))
@@ -167,8 +165,8 @@ class ZipUrl(FileUrl):
         if not tf and not ts:
             return nl[0]
         else:
-            raise ZipUrlError("Could not find file in Zip for target='{}' nor segment='{}'".format(url.target_file,
-                                                                                                   url.target_segment))
+            raise ZipUrlError("Could not find file in Zip {} for target='{}' nor segment='{}'"
+                              .format(url.path, url.target_file,url.target_segment))
     @staticmethod
     def real_files_in_zf(zf):
         """Return a list of internal paths of real files in a zip file, based on the 'external_attr' values"""

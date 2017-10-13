@@ -29,7 +29,10 @@ class WebUrl(Url):
     def list(self):
         """Return a list of this URL with the fragments from listing the resource"""
 
-        return list(self.set_fragment(u.fragment) for u in self.get_resource().list())
+        r = self.get_resource()
+
+
+        return list(self.set_fragment(u.fragment) for u in r.list())
 
     @property
     def auth_resource_url(self):

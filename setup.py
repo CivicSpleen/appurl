@@ -9,7 +9,7 @@ if sys.argv[-1] == 'publish':
 setup(
     name='appurl',
     version='0.1.8',
-    url='https://github.com/CivicKnowledge/appurl',
+    url='https://github.com/Metatab/appurl',
     license='MIT',
     author='Eric Busboom',
     author_email='eric@busboom.org',
