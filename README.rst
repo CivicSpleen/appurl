@@ -1,8 +1,8 @@
 Application Urls
 ****************
 
-.. image:: https://travis-ci.org/CivicKnowledge/appurl.svg?branch=master
-    :target: https://travis-ci.org/CivicKnowledge/appurl
+.. image:: https://travis-ci.org/Metatab/appurl.svg?branch=master
+    :target: https://travis-ci.org/Metatab/appurl
 
 Application Urls provide structure and operations on URLS where the file the
 URL refers to can't, in general, simply be downloaded. For instance, you may

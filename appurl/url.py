@@ -50,7 +50,7 @@ def parse_app_url(u_str, downloader='default', **kwargs):
         raise AppUrlError("Input isn't a string nor Url")
 
     if downloader == 'default':
-        from appurl import get_cache, Downloader
+        from appurl import Downloader
         downloader = Downloader()
 
     classes = match_url_classes(u_str, **kwargs)

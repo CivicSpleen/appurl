@@ -28,7 +28,7 @@ def appurl():
     entries = []
     for ep in iter_entry_points('appurl.urls'):
         c = ep.load()
-        entries.append([c.match_priority, ep.module_name, ep.name, c.__name__, ])
+        entries.append([c.match_priority, ep.name, ep.module_name,  c.__name__, ])
 
 
     print(tabulate(sorted(entries), ['Priority', 'EP Name', 'Module', 'Class'] ))
