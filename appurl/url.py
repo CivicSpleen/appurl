@@ -411,7 +411,7 @@ class Url(object):
 
         from rowgenerators import get_generator
 
-        return get_generator(self.get_resource.get_target())
+        return get_generator(self.get_resource().get_target())
 
 
     #

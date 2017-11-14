@@ -42,7 +42,10 @@ class PythonUrl(FileUrl):
 
     def __call__(self, *args, **kwargs):
 
-        return self.object(*args, **kwargs)
+        try:
+            return self.object(*args, **kwargs)
+        except TypeError as e:
+            raise TypeError(str(e)+"; for args='{}', kwargs='{}' ".format(args, kwargs))
 
 
 

@@ -23,3 +23,8 @@ class CsvFileUrl(FileUrl):
                                 scheme=self.scheme if self.scheme else 'file',
                                 scheme_extension=False,
                                 fragment=False)
+
+    @property
+    def target_format(self):
+        return 'csv'
+
