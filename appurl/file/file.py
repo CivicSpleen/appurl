@@ -5,7 +5,7 @@
 
 from appurl.url import Url
 from appurl.util import ensure_dir
-from os.path import exists, isdir, dirname
+from os.path import exists, isdir, dirname, basename, join
 
 
 class FileUrl(Url):
@@ -32,6 +32,9 @@ class FileUrl(Url):
 
     def dirname(self):
         return dirname(self.path)
+
+    def basename(self):
+        return basename(self.path)
 
     def ensure_dir(self):
         ensure_dir(self.path)
@@ -83,5 +86,19 @@ class FileUrl(Url):
             pass
 
         return self.clone().join_dir(tf)
+
+    def rename(self, new_path):
+        from os import rename
+
+        rename(self.path, new_path)
+
+        self.path = new_path
+
+    def base_rename(self, new_name):
+        """"Rename only the last path element"""
+
+        new_path = join(dirname(self.path), new_name)
+
+        return self.rename(new_path)
 
 
