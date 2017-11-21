@@ -270,16 +270,26 @@ def get_cache(cache_name=DEFAULT_CACHE_NAME, clean=False):
 
     from fs.osfs import OSFS
     from fs.appfs import UserDataFS
+    from fs.errors import CreateFailed
     import os
 
     env_var = (cache_name+'_cache').upper()
 
     cache_dir = os.getenv(env_var, None)
 
+
     if cache_dir:
-        return OSFS(cache_dir)
+        try:
+            return OSFS(cache_dir)
+        except CreateFailed as e:
+            raise CreateFailed("Failed to create '{}': {} ".format(cache_dir, e))
     else:
-        return UserDataFS(cache_name.lower())
+
+        try:
+            return UserDataFS(cache_name.lower())
+        except CreateFailed as e:
+            raise CreateFailed("Failed to create '{}': {} ".format(cache_name.lower(), e))
+
 
 def clean_cache(cache = None, cache_name=DEFAULT_CACHE_NAME):
     """Delete items in the cache older than 4 hours"""

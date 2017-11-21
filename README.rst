@@ -24,7 +24,7 @@ Install
 
 .. code-block:: bash
 
-    $ pip isntall appurl
+    $ pip install appurl
 
 Documentation
 =============
@@ -57,7 +57,7 @@ on the source directory. This is done automatically from the Makefile in appurl/
     $ make build # to create the container image
     $ make shell # to run bash the container
 
-You now have a docker container wher the /code directory is the appurl source dir.
+You now have a docker container where the /code directory is the appurl source dir.
 
 Now, run tox to build the tox virtual environments, then enter the specific version you want to
 run tests for and activate the virtual environment.
@@ -71,7 +71,6 @@ run tests for and activate the virtual environment.
     # python setup.py test # Cause test deps to get installed
     #
     # python -munittest appurl.test.test_basic.BasicTests.test_url_classes  # Run one test
-
 
 
 
