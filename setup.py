@@ -8,7 +8,7 @@ if sys.argv[-1] == 'publish':
 
 setup(
     name='appurl',
-    version='0.2.2',
+    version='0.2.3',
     url='https://github.com/Metatab/appurl',
     license='MIT',
     author='Eric Busboom',

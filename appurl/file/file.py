@@ -68,8 +68,13 @@ class FileUrl(Url):
         """Return the url of the target file in the local file system.
         """
 
-        return self.clear_fragment()
+        t =  self.clear_fragment()
 
+        if self.encoding:
+            t.encoding = self.encoding
+
+
+        return t
 
     def read(self, mode='rb'):
         """Return contents of the target file"""
