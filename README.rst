@@ -53,7 +53,7 @@ on the source directory. This is done automatically from the Makefile in appurl/
 
 .. code-block:: bash
 
-    $ cd appurl/test
+    $ cd ./docker
     $ make build # to create the container image
     $ make shell # to run bash the container
 

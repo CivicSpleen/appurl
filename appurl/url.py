@@ -414,7 +414,7 @@ class Url(object):
         r = self.get_resource()
         t = r.get_target()
 
-        return get_generator(t.get_target())
+        return get_generator(t.get_target(), source_url=self)
 
 
     #

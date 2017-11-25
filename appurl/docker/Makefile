@@ -10,7 +10,7 @@ DOCKER ?= docker
 .PHONY: test build push shell run start stop restart reload rm rmf release
 CWD = $(notdir $(shell pwd))
 
-VOLUMES=-v $(abspath $(CWD)/../../..):/code
+VOLUMES=-v $(abspath $(CWD)/..):/code
 
 test:
 	$(DOCKER) run --rm --name $(NAME) $(PORTS) $(VOLUMES) $(ENV) $(NS)/$(REPO):$(VERSION) tox
