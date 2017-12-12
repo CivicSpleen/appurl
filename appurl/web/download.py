@@ -21,6 +21,10 @@ from appurl.util import parse_url_to_dict, copy_file_or_flo
 from appurl.url import Url
 from appurl.exc import *
 
+#DEBUG
+import inspect
+from appurl.util import debug_print
+##
 
 class _NoOpFileLock(object):
     """No Op for pyfilesystem caches where locking wont work"""
@@ -166,14 +170,16 @@ class Downloader(object):
         # Create a name for the file in the cache, based on the URL
         # the '\' replacement is because pyfs only wants to use UNIX path seperators, but
         # python os.path.join will use the one specified for the operating system.
-        cache_path = join(parsed.netloc, parsed.path.strip('/'))
 
+        cache_path = "/".join([parsed.netloc, parsed.path.strip('/')])
+        
         # If there is a query, hash it and add it to the path
         if parsed.query:
             hash = hashlib.sha224(parsed.query.encode('utf8')).hexdigest()
             # We put the hash before the last path element, because that's the target faile, which gets
             # used to figure out what the target format should be.
-            cache_path = join(dirname(cache_path), hash, basename(cache_path))
+
+            cache_path = "/".join([dirname(cache_path), hash, basename(cache_path)])                                    
 
         if not self.cache.exists(cache_path):
 
@@ -188,7 +194,8 @@ class Downloader(object):
                 bn = os.path.basename(cache_path)
                 for i in range(10):
                     try:
-                        cache_path = join(dn + str(i), bn)
+                        
+                        cache_path = "/".join([dn + str(i), bn])                            
                         self.cache.makedirs(os.path.dirname(cache_path))
                         break
                     except DirectoryExpected as e2:
