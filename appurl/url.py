@@ -8,12 +8,6 @@ from os.path import basename, join, dirname
 from pkg_resources import iter_entry_points
 from .exc import AppUrlError
 
-#DEBUG
-import inspect
-def debug_print(s,fn,lno):    
-    print(fn + " " + str(lno) + ": " + s)
-##    
-
 # from traitlets import HasTraits, Unicode, Any, Dict, observe, TraitError
 
 
