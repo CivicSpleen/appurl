@@ -5,11 +5,17 @@
 """ """
 
 import re
-from os import makedirs
-from os.path import isdir, dirname, splitext, exists
+from os import makedirs, name
+from os.path import isdir, dirname, splitext, exists, splitdrive
 from urllib.parse import unquote_plus, ParseResult, urlparse, quote_plus, parse_qs, urlencode, unquote
 
 from six import text_type
+
+#DEBUG
+import inspect
+def debug_print(s,fn,lno):    
+    print(fn + " " + str(lno) + ": " + s)
+##
 
 # From http://stackoverflow.com/a/295466
 def slugify(value):
@@ -42,8 +48,17 @@ def path2url(path):
         # Python 2
         from urllib.parse import urljoin
         from urllib import pathname2url
-
-    return urljoin('file:', pathname2url(path))
+    
+    if name == 'nt':
+        # pathname2url adds an extra '/' in front of the drive letter
+        # resulting in an incorrect URL. Use pathlib instead.
+        try:
+            import pathlib
+            return pathlib.Path(path).as_uri()
+        except Exception as e:
+            raise e        
+    else:    
+        return urljoin('file:', pathname2url(path))
 
 def parse_url_to_dict(url, assume_localhost=False):
     """Parse a url and return a dict with keys for all of the parts.
@@ -56,14 +71,14 @@ def parse_url_to_dict(url, assume_localhost=False):
     assert url is not None
 
     url = text_type(url)
-
+    
     if re.match(r'^[a-zA-Z]:', url):
         url = path2url(url)
 
         p = urlparse(unquote_plus(url))
 
         # urlparse leaves a '/' before the drive letter.
-        p = ParseResult(p.scheme, p.netloc, p.path.lstrip('/'), p.params, p.query, p.fragment)
+        p = ParseResult(p.scheme, p.netloc, p.path.lstrip('/'), p.params, p.query, p.fragment)       
 
     else:
         p = urlparse(url)
@@ -166,8 +181,7 @@ def unparse_url_dict(d, **kwargs):
 
     if d.get('fragment') or d.get('fragment_query'):
 
-        if isinstance(d.get('fragment'),(list, tuple)):
-
+        if isinstance(d.get('fragment'),(list, tuple)):            
             seg = ';'.join(quote_plus(str(e)) for e in [ e for e in d.get('fragment') if e])
         else:
             seg = quote_plus(d.get('fragment'))
@@ -194,8 +208,8 @@ def join_url_path(url, *paths):
     """Like path.os.join, but operates on the url path, ignoring the query and fragments."""
 
     parts = parse_url_to_dict(url)
-
-    return reparse_url(url, path=os.path.join(parts['path']))
+    
+    return reparse_url(url, path=os.path.join(parts['path']))    
 
 def file_ext(v):
     """Split of the extension of a filename, without throwing an exception of there is no extension. Does not

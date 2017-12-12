@@ -8,6 +8,11 @@ from os.path import basename, join, dirname
 from pkg_resources import iter_entry_points
 from .exc import AppUrlError
 
+#DEBUG
+import inspect
+def debug_print(s,fn,lno):    
+    print(fn + " " + str(lno) + ": " + s)
+##    
 
 # from traitlets import HasTraits, Unicode, Any, Dict, observe, TraitError
 
@@ -20,7 +25,7 @@ def match_url_classes(u_str, **kwargs):
     :param kwargs: arguments passed to Url constructor
     :return:
     """
-
+    
     u = Url(str(u_str), downloader=None, **kwargs)
 
     classes = sorted([ep.load() for ep in iter_entry_points(group='appurl.urls') if u._match_entry_point(ep.name)],
@@ -48,7 +53,7 @@ def parse_app_url(u_str, downloader='default', **kwargs):
 
     if not isinstance(u_str, str):
         raise AppUrlError("Input isn't a string nor Url")
-
+ 
     if downloader == 'default':
         from appurl import Downloader
         downloader = Downloader()
@@ -174,7 +179,8 @@ class Url(object):
 
             for k, v in parts.items():
                 try:
-                    # print(" {}: '{}' ".format(k,v))
+                    #DEBUG
+                    #print(" {}: '{}' ".format(k,v))
                     setattr(self, k, v)
                 except AttributeError:
                     print("Can't Set: ", k, v)
@@ -215,7 +221,7 @@ class Url(object):
             pass
 
         self._downloader = downloader
-
+        
     def get_resource(self):
         """Get the contents of resource and save it to the cache, returning a file-like object"""
         raise NotImplementedError(("get_resource not implemented in {} for '{}'. "
@@ -280,9 +286,9 @@ class Url(object):
         if netloc:
             return u
 
-        url = copy(self)
+        url = copy(self)        
         url.path = join(self.path, path)
-
+        
         return url
 
     def join_dir(self, s):
@@ -307,9 +313,9 @@ class Url(object):
         if netloc:
             return u
 
-        url = copy(self)
-        url.path = join(dirname(self.path), path)
-
+        url = copy(self)       
+        url.path = join(dirname(self.path), path)         
+        
         return url
 
     def join_target(self, tf):
